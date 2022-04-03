@@ -48,16 +48,16 @@ memMsg:
         .type   main, %function
 main:
         sub     sp, sp, 16      @ space for saving regs
-        str     r4, [sp, 0]     @ save r4
-        str     r5, [sp, 4]     @      r5
-        str     fp, [sp, 8]     @      fp
-        str     lr, [sp, 12]    @      lr
-        add     fp, sp, 12      @ set our frame pointer
-        sub     sp, sp, STACK_ARGS @ sp on 8-byte boundary
+        str     r4, [sp, #0]     @ save r4
+        str     r5, [sp, #4]     @      r5
+        str     fp, [sp, #8]     @      fp
+        str     lr, [sp, #12]    @      lr
+        add     fp, sp, #12      @ set our frame pointer
+        sub     sp, sp, #STACK_ARGS @ sp on 8-byte boundary
 
 @ Open /dev/gpiomem for read/write and syncing        
-        ldr     r0, deviceAddr  @ address of /dev/gpiomem
-        ldr     r1, openMode    @ flags for accessing device
+        ldr     r0, #deviceAddr  @ address of /dev/gpiomem
+        ldr     r1, #openMode    @ flags for accessing device
         bl      open
         mov     r4, r0          @ use r4 for file descriptor
 
@@ -67,15 +67,13 @@ main:
         bl      printf
 
 @ Map the GPIO registers to a virtual memory location so we can access them        
-        str     r4, [sp, FILE_DESCRP_ARG] @ /dev/gpiomem file descriptor
+        str     r4, [sp, #FILE_DESCRP_ARG] @ /dev/gpiomem file descriptor
         ldr     r0, gpio        @ address of GPIO
-        str     r0, [sp, DEVICE_ARG]      @ location of GPIO
-        mov     r0, NO_PREF     @ let kernel pick memory
-        mov     r1, PAGE_SIZE   @ get 1 page of memory
-        mov     r2, PROT_RDWR   @ read/write this memory
-        mov     r3, MAP_SHARED  @ share with other processes
-        @ em R4 já contem o flie decriptor
-        @ não sei o que tem em r5 seria 0 ??
+        str     r0, [sp, #DEVICE_ARG]      @ location of GPIO
+        mov     r0, #NO_PREF     @ let kernel pick memory
+        mov     r1, #PAGE_SIZE   @ get 1 page of memory
+        mov     r2, #PROT_RDWR   @ read/write this memory
+        mov     r3, #MAP_SHARED  @ share with other processes
         bl      mmap
         mov     r5, r0          @ save virtual memory address
         
@@ -84,38 +82,18 @@ main:
         ldr     r0, memMsgAddr
         bl      printf
                 
-@ acho que podemos colocar o nosso codigo aqui no meio antes de desmapear a memoria virtual e fechar o arquivo
+@ codigo para ativar o LED 
 
         @ colocando o pino 6 no modo output
-        mov       r0, gpio        @ address of GPIO
-        mov       r1, 1           @ set pin 6 to output, 001 = 1 = output
+        mov       r0, gpio        @ address of GPIO =0x7E200000
+        mov       r1, #1           @ set pin 6 to output, 001 = 1 = output
         lsl       r1, #18
-        str       r1, [r0, #0]
+        str       r1, [r5, #0]     @ testar com r5 e r0
         
-        mov       r2, 1
-        lsl       r2, #6
-        str       r2, [r0, #40]
+        mov       r1, #1
+        lsl       r1, #6
+        str       r1, [r5, #40]    @ testar com r5 e r0
 
-@-----------------------------------------------------------------------------
-@ talvez o correto seja usar o munmap entre cada chamada de função, eu não sei mas vou supor que não vai ser necessario
-@-----------------------------------------------------------------------------
-        mov     r0, r5          @ memory to unmap
-        mov     r1, PAGE_SIZE   @ amount we mapped
-        bl      munmap          @ unmap it
-
-        mov     r0, r4          @ /dev/gpiomem file descriptor
-        bl      close           @ close the file
-        
-        mov     r0, 0           @ return 0;
-        add     sp, sp, STACK_ARGS  @ fix sp
-        ldr     r4, [sp, 0]     @ restore r4
-        ldr     r5, [sp, 4]     @      r5
-        ldr     fp, [sp, 8]     @         fp
-        ldr     lr, [sp, 12]    @         lr
-        add     sp, sp, 16      @ restore sp
-        bx      lr              @ return
-        
-        .align  2
 
 @ addresses of messages
 fdMsgAddr:
