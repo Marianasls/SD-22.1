@@ -92,7 +92,10 @@ main:
         
         mov       r1, #1
         lsl       r1, #6
+        @ 28 = 0x1C seria o registrador do set
+        @ 40 = 0x28 seria o registrador do clear
         str       r1, [r5, #40]    @ testar com r5 e r0
+        @str       r1, [r5, #28]    @ testar com r5 e r0
 
 
 @ addresses of messages
