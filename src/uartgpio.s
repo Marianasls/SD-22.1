@@ -127,6 +127,10 @@ main:
         add       r0, r0, r1       @ configurando a ativação da transmissão
 
         mov       r1, #1
+        lsl       r1, #9           @ setando o bit de recepção
+        add       r0, r0, r1       @ configurando a ativação da recepção
+
+        mov       r1, #1
         lsl       r1, #7           @ setando o bit de loopback
         add       r0, r0, r1       @ configurando a ativação do loopback
 
