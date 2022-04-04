@@ -2,6 +2,7 @@
 @ Opens the /dev/gpiomem device and maps GPIO memory
 @ into program virtual address space.
 @ 2017-09-29: Bob Plantz 
+@ 2022-04-04: Modificado por Anderson, Esther e Mariana.
 
 @ Define my Raspberry Pi
         .cpu    cortex-a53
@@ -20,7 +21,6 @@
         .equ    PROT_WRITE,0x2  @ page can be written
         .equ    MAP_SHARED,0x01 @ share changes
 @ The following are defined by me:
-        @ .equ    PERIPH,0x3f000000   @ RPi 2 & 3 peripherals
         .equ    PERIPH,0x20000000   @ RPi zero & 1 peripherals
         .equ    GPIO_OFFSET,0x200000  @ start of GPIO device
         .equ    O_FLAGS,O_RDWR|O_SYNC @ open file flags
@@ -88,14 +88,14 @@ main:
         mov       r0, gpio        @ address of GPIO =0x7E200000
         mov       r1, #1           @ set pin 6 to output, 001 = 1 = output
         lsl       r1, #18
-        str       r1, [r5, #0]     @ testar com r5 e r0
+        str       r1, [r5, #0]    
         
         mov       r1, #1
         lsl       r1, #6
-        @ 28 = 0x1C seria o registrador do set
-        @ 40 = 0x28 seria o registrador do clear
-        str       r1, [r5, #40]    @ testar com r5 e r0
-        @str       r1, [r5, #28]    @ testar com r5 e r0
+        @ 28 = 0x1C registrador do set, desliga o led
+        @ 40 = 0x28 registrador do clear, liga o led
+        str       r1, [r5, #40]   
+        @str       r1, [r5, #28]   
 
 
 @ addresses of messages
