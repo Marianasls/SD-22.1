@@ -115,6 +115,35 @@ main:
 
 @ codigo para ativar a UART
 
+@----- UARTLCR_ LCRH Register is the line control register
+
+        @ 1º bit é Parity enable
+        @ 2º bit é Even parity select - 1 para par , 0 para impar
+        @ 3º bit é Two stop bits select - usar 2 stop bits
+        @ 5º e 6º bits são Word length. 11 para 8 bits, 10 para 7 bits, 01 para 6 bits, 00 para 5 bits
+
+        mov r0, #0
+         
+        mov       r1, #1
+        lsl       r1, #1          @ setando o bit que ativa a paridade
+        add       r0, r0, r1      @ configurando a ativação da paridade
+
+        mov       r1, #1
+        lsl       r1, #2          @ setando o bit da paridade no modo par
+        add       r0, r0, r1      @ configurando a paridade no modo par
+
+        mov       r1, #0
+        lsl       r1, #3          @ setando o bit que ativa o 2 stop bits
+        add       r0, r0, r1      @ configurando a ativação do 2 stop bits
+
+        mov       r1, #3          @ 3 -> b11, setando o bit de word length para 8 bits
+        lsl       r1, #5          @ setando o bit que ativa o 8 bits
+        add       r0, r0, r1      @ configurando a ativação do 8 bits
+
+        str       r0, [r8, #44]   @ o registrador de controle da UART esta na posicao 44(0x2C em hexadecimal)
+
+@------- Registrador de controle da UART
+
         @ o 0º bit é UARTEN que ativa a UART
         @ o 7º bit é LBE (loopback enable)
         @ o 8º bit é TXE (transmit enable)
@@ -135,6 +164,15 @@ main:
         add       r0, r0, r1       @ configurando a ativação do loopback
 
         str       r1, [r8, #48]    @ o registrador de controle da UART esta na posicao 48(0x30 em hexadecimal)
+
+@------- Register is the integer part of the baud rate divisor
+
+        mov r0, #8
+        str       r0, [r8, #36]    @ o registrador de controle da UART esta na posicao 36(0x24 em hexadecimal)
+
+@------ Register is the fractional part of the baud rate divisor
+        mov r0, #0
+        str       r0, [r8, #40]    @ o registrador de controle da UART esta na posicao 40(0x28 em hexadecimal)
 
 @gpio
         mov     r0, r5          @ memory to unmap
