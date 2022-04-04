@@ -176,7 +176,7 @@ openMode:
         .word   O_FLAGS
 memMsgAddr:
         .word   memMsg
-gpio:
-        .word   PERIPH+GPIO_OFFSET
+@gpio:
+@        .word   PERIPH+GPIO_OFFSET
 uart:
         .word   PERIPH+UART_OFFSET
