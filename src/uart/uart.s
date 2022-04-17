@@ -133,18 +133,19 @@ _start:
 
         mov       r0, #0
          
-        mov       r1, #1
+        mov       r1, #1        @ parametro
         lsl       r1, #1          @ setando o bit que ativa a paridade
         add       r0, r0, r1      @ configurando a ativação da paridade
 
-        mov       r1, #1
+        mov       r1, #1        @ parametro
         lsl       r1, #2          @ setando o bit da paridade no modo par
         add       r0, r0, r1      @ configurando a paridade no modo par
 
-        mov       r1, #0
+        mov       r1, #0        @ parametro
         lsl       r1, #3          @ setando o bit que ativa o 2 stop bits
         add       r0, r0, r1      @ configurando a ativação do 2 stop bits
 
+                                @ parametro
         mov       r1, #3          @ 3 -> b11, setando o bit de word length para 8 bits
         lsl       r1, #5          @ setando o bit que ativa o 8 bits
         add       r0, r0, r1      @ configurando a ativação do 8 bits
@@ -174,18 +175,18 @@ _start:
         lsl       r1, #8           @ setando o bit de transmissão
         add       r0, r0, r1       @ configurando a ativação da transmissão
 
-        mov       r1, #1
+        mov       r1, #0
         lsl       r1, #9           @ setando o bit de recepção
         add       r0, r0, r1       @ configurando a ativação da recepção
 
-        mov       r1, #1
+        mov       r1, #1        @ parametro
         lsl       r1, #7           @ setando o bit de loopback
         add       r0, r0, r1       @ configurando a ativação do loopback
 
         str       r1, [r8, #48]    @ o registrador de controle da UART esta na posicao 48(0x30 em hexadecimal)
         
         @enviando um dado para teste
-        mov       r0, #28
+        mov       r0, #28       @ parametro
         str       r0, [r8, #0]     @ o registrador de dados da UART esta na posicao 0(0x00 em hexadecimal)
 
         mov     r0, 0           @ return 0;
