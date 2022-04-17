@@ -9,27 +9,74 @@
         .syntax unified         @ modern syntax
 
 @ Constants for assembler
-@ The following are defined in /usr/include/asm-generic/fcntl.h:
-@ Note that the values are specified in octal.
-        .equ    O_RDWR,00000002   @ open for read/write
-        .equ    O_DSYNC,00010000  @ synchronize virtual memory
-        .equ    __O_SYNC,04000000 @      programming changes with
-        .equ    O_SYNC,__O_SYNC|O_DSYNC @ I/O memory
-@ The following are defined in /usr/include/asm-generic/mman-common.h:
-        .equ    PROT_READ,0x1   @ page can be read
-        .equ    PROT_WRITE,0x2  @ page can be written
-        .equ    MAP_SHARED,0x01 @ share changes
-@ The following are defined by me:
-        @ .equ    PERIPH,0x3f000000   @ RPi 2 & 3 peripherals
-        .equ    PERIPH,0x20000000   @ RPi zero & 1 peripherals
-        .equ    UART_OFFSET,0x201000    @ start of UART device
-        .equ    O_FLAGS,O_RDWR|O_SYNC @ open file flags
-        .equ    PROT_RDWR,PROT_READ|PROT_WRITE
-        .equ    NO_PREF,0
-        .equ    PAGE_SIZE,4096  @ Raspbian memory page
-        .equ    FILE_DESCRP_ARG,0   @ file descriptor
-        .equ    DEVICE_ARG,4        @ device address
         .equ    STACK_ARGS,8    @ sp already 8-byte aligned
+
+@ MACROS CONSTANTS
+
+        .equ	O_RDONLY, 0
+        .equ	O_WRONLY, 1
+        .equ	O_CREAT,  0100
+        .equ	O_RDWR,   2
+        .equ	O_SYNC,   04010000
+        .equ	O_CLOEXEC, 02000000
+        .equ	S_RDWR,   0666
+        .equ	pagelen, 4096
+        .equ	setregoffset, 28
+        .equ    clrregoffset, 40
+        .equ	PROT_READ, 1
+        .equ	PROT_WRITE, 2
+        .equ	PROT_RDWR, 3
+        .equ	MAP_SHARED, 1
+        .equ    sys_open, 5	@ open and possibly create a file
+        .equ    sys_mmap2, 192	@ map files or devices into memory
+@ END MACROS CONSTANTS
+
+
+@ MACROS --------------------------------------------------------------
+.macro  openFile    fileName
+        ldr         r0, =\fileName
+        ldr         r1, =flags
+	ldr 	    r1, [r1 , 0]
+	mov	    r2, #S_RDWR		@ RW access rights
+        mov	    r7, #sys_open
+        svc         0
+.endm
+
+.macro mapMem
+	openFile	uartFile
+	movs		r4, r0	@ fd for memmap
+	@ check for error and print error msg if necessary
+	BPL		1f  @ pos number file opened ok
+	MOV		R1, #1  @ stdout
+	LDR		R2, =memOpnsz	@ Error msg
+	LDR		R2, [R2 , 0]
+	writeFile	R1, memOpnErr, R2 @ print the error
+	B		_end
+
+@ Setup can call the mmap2 Linux service
+1:	ldr		r5, =#uartaddr	@ address we want / 4096
+	ldr		r5, [r5 , 0]	@ load the address
+	mov		r1, #pagelen	@ size of mem we want
+	mov		r2, #(PROT_READ + PROT_WRITE) @ mem protection options
+
+	@mov		r2, #PROT_RDWR  @ no caso de um possivel erro na linha anterior substituir por essa
+
+	mov		r3, #MAP_SHARED	@ mem share options
+	mov		r0, #0		@ let linux choose a virtual address
+	mov		r7, #sys_mmap2	@ mmap2 service num
+	svc		0		@ call service
+	movs		r8, r0		@ keep the returned virtual address
+	@ check for error and print error msg if necessary
+	BPL		2f  @ pos number file opened ok
+	MOV		R1, #1  @ stdout
+	LDR		R2, =memMapsz	@ Error msg
+	LDR		R2, [R2 , 0]
+	writeFile	R1, memMapErr, R2 @ print the error
+	B		_end
+2:
+.endm
+
+@ END MACROS ----------------------------------------------------------
 
 @ Constant program data
         .section .rodata
@@ -43,12 +90,25 @@ fdMsg:
 memMsg:
         .asciz  "Using memory at %p\n"
 
+uartaddr:
+        .word   0x20201
+flags: 
+        .word O_RDWR+O_SYNC+O_CLOEXEC
+memOpnErr:     
+        .asciz  "Failed to open /dev/ttyAMA0\n"
+memOpnsz:      
+        .word  .-memOpnErr 
+memMapErr:     
+        .asciz  "Failed to map memory\n"
+memMapsz:      
+        .word  .-memMapErr 
+        .align  4 @ relign after strings
+
 @ The program
         .text
         .align  2
-        .global main
-        .type   main, %function
-main:
+        .global _start
+_start:
         sub     sp, sp, 16      @ space for saving regs
         str     r4, [sp, #0]     @ save r4
         str     r5, [sp, #4]     @      r5
@@ -56,33 +116,13 @@ main:
         str     lr, [sp, #12]    @      lr
         add     fp, sp, #12      @ set our frame pointer
         sub     sp, sp, #STACK_ARGS @ sp on 8-byte boundary
-
-@ UART        
-@ Open /dev/ttyAMA0 for read/write and syncing        
-        ldr     r0, #uartAddr  @ address of /dev/ttyAMA0
-        ldr     r1, #openMode    @ flags for accessing device
-        bl      open
-        mov     r4, r0          @ use r4 for uart file descriptor
-
-@ Display file descriptor
-        ldr     r0, fdMsgAddr   @ format for printf
-        mov     r1, r4          @ file descriptor
-        bl      printf
-
-@ Map the UART registers to a virtual memory location so we can access them
-        mov     r0, #NO_PREF     @ let kernel pick memory
-        mov     r1, #PAGE_SIZE   @ get 1 page of memory
-        mov     r2, #PROT_RDWR   @ read/write this memory
-        mov     r3, #MAP_SHARED  @ share with other processes
-        bl      mmap
-        mov     r5, r0          @ save virtual memory address
         
-@ Display virtual address
-        mov     r1, r5
-        ldr     r0, memMsgAddr
-        bl      printf
+        mapMem // salva o endereço virtual em r8
 
 @ codigo para ativar a UART
+        @ desligando a UART
+        mov       r0, #0
+        str       r0, [r8, #48]    @ o registrador de controle da UART esta na posicao 48(0x30 em hexadecimal)
 
 @----- UARTLCR_ LCRH Register is the line control register
 
@@ -91,7 +131,7 @@ main:
         @ 3º bit é Two stop bits select - usar 2 stop bits
         @ 5º e 6º bits são Word length. 11 para 8 bits, 10 para 7 bits, 01 para 6 bits, 00 para 5 bits
 
-        mov r0, #0
+        mov       r0, #0
          
         mov       r1, #1
         lsl       r1, #1          @ setando o bit que ativa a paridade
@@ -110,8 +150,16 @@ main:
         add       r0, r0, r1      @ configurando a ativação do 8 bits
 
         str       r0, [r8, #44]   @ o registrador de controle da UART esta na posicao 44(0x2C em hexadecimal)
+        
 
+@------- Register is the integer part of the baud rate divisor
 
+        mov r0, #6510   // fiz a conta com o clock de refençia sendo 1Ghz
+        str       r0, [r8, #36]    @ o registrador de controle da UART esta na posicao 36(0x24 em hexadecimal)
+
+@------ Register is the fractional part of the baud rate divisor
+        mov r0, #4167   // fiz a conta com o clock de refençia sendo 1Ghz
+        str       r0, [r8, #40]    @ o registrador de controle da UART esta na posicao 40(0x28 em hexadecimal)
 
 @------- Registrador de controle da UART
 
@@ -134,25 +182,11 @@ main:
         lsl       r1, #7           @ setando o bit de loopback
         add       r0, r0, r1       @ configurando a ativação do loopback
 
-        str       r1, [r5, #48]    @ o registrador de controle da UART esta na posicao 48(0x30 em hexadecimal)
+        str       r1, [r8, #48]    @ o registrador de controle da UART esta na posicao 48(0x30 em hexadecimal)
         
-
-@------- Register is the integer part of the baud rate divisor
-
-        mov r0, #8
-        str       r0, [r5, #36]    @ o registrador de controle da UART esta na posicao 36(0x24 em hexadecimal)
-
-@------ Register is the fractional part of the baud rate divisor
-        mov r0, #0
-        str       r0, [r5, #40]    @ o registrador de controle da UART esta na posicao 40(0x28 em hexadecimal)
-
-
-        mov     r0, r5          @ memory to unmap
-        mov     r1, PAGE_SIZE   @ amount we mapped
-        bl      munmap          @ unmap it
-
-        mov     r0, r4          @ /dev/ttyAMA0 file descriptor
-        bl      close           @ close the file
+        @enviando um dado para teste
+        mov       r0, #28
+        str       r0, [r8, #0]     @ o registrador de dados da UART esta na posicao 0(0x00 em hexadecimal)
 
         mov     r0, 0           @ return 0;
         add     sp, sp, STACK_ARGS  @ fix sp
@@ -164,19 +198,3 @@ main:
         bx      lr              @ return
         
         .align  2
-
-@ addresses of messages
-fdMsgAddr:
-        .word   fdMsg
-deviceAddr:
-        .word   device
-uartAddr:
-        .word   uartFile
-openMode:
-        .word   O_FLAGS
-memMsgAddr:
-        .word   memMsg
-@gpio:
-@        .word   PERIPH+GPIO_OFFSET
-uart:
-        .word   PERIPH+UART_OFFSET
