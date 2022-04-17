@@ -124,6 +124,13 @@ _start:
         mov       r0, #0
         str       r0, [r8, #48]    @ o registrador de controle da UART esta na posicao 48(0x30 em hexadecimal)
 
+@ desativa FIFO
+        ldr       r0, #0
+        mov       r1, #0
+        lsl       r1, #4          @ setando o bit que ativa a fifo
+        add       r0, r0, r1      @ configurando bit para desativar fifo
+        str       r0, [r8, #44]
+
 @----- UARTLCR_ LCRH Register is the line control register
 
         @ 1º bit é Parity enable
@@ -152,6 +159,11 @@ _start:
 
         str       r0, [r8, #44]   @ o registrador de controle da UART esta na posicao 44(0x2C em hexadecimal)
         
+@ ativa FIFO
+        mov       r1, #1
+        lsl       r1, #4          @ setando o bit que ativa a fifo
+        add       r0, r0, r1      @ configurando bit para ativar fifo
+        str       r0, [r8, #44]
 
 @------- Register is the integer part of the baud rate divisor
 
