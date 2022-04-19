@@ -16,18 +16,11 @@ S_RDWR:
 device:
         .asciz  "/dev/gpiomem"
 uartFile:
-        .asciz  "/dev/mem" @ ver https://www.raspberrypi.com/documentation/computers/configuration.html#primary-and-secondary-uart
-fdMsg:
-        .asciz  "File descriptor = %i\n"
-memMsg:
-        .asciz  "Using memory at %p\n"
+        .asciz  "/dev/mem"
 uartaddr:
         .word   0x20201
 flags: 
         .word O_RDWR+O_SYNC+O_CLOEXEC
-
-@ Constants for assembler
-        .equ    STACK_ARGS,8    @ sp already 8-byte aligned
 
 @ MACROS CONSTANTS
         .equ	O_RDONLY, 0
@@ -60,17 +53,10 @@ flags:
 
 .macro mapMem
 	openFile	uartFile
-	movs		r4, r0	@ fd for memmap
-	@ check for error and print error msg if necessary
-	BPL		1f  @ pos number file opened ok
-	MOV		R1, #1  @ stdout
-	LDR		R2, =memOpnsz	@ Error msg
-	LDR		R2, [R2 , 0]
-	writeFile	R1, memOpnErr, R2 @ print the error
-	B		_end
+	mov		r4, r0	@ fd for memmap
 
 @ Setup can call the mmap2 Linux service
-1:	ldr		r5, =#uartaddr	@ address we want / 4096
+	ldr		r5, =#uartaddr	@ address we want / 4096
 	ldr		r5, [r5 , 0]	@ load the address
 	mov		r1, #pagelen	@ size of mem we want
 	@mov		r2, #(PROT_READ + PROT_WRITE) @ mem protection options
@@ -81,15 +67,7 @@ flags:
 	mov		r0, #0		@ let linux choose a virtual address
 	mov		r7, #sys_mmap2	@ mmap2 service num
 	svc		0		@ call service
-	movs		r8, r0		@ keep the returned virtual address
-	@ check for error and print error msg if necessary
-	BPL		2f  @ pos number file opened ok
-	MOV		R1, #1  @ stdout
-	LDR		R2, =memMapsz	@ Error msg
-	LDR		R2, [R2 , 0]
-	writeFile	R1, memMapErr, R2 @ print the error
-	B		_end
-2:
+	mov		r8, r0		@ keep the returned virtual address
 .endm
 
 @ END MACROS ----------------------------------------------------------
@@ -98,15 +76,7 @@ flags:
         .text
         .align  2
         .global _start
-_start:
-        sub     sp, sp,       @ space for saving regs
-        str     r4, [sp, #0]     @ save r4
-        str     r5, [sp, #4]     @      r5
-        str     fp, [sp, #8]     @      fp
-        str     lr, [sp, #12]    @      lr
-        add     fp, sp, #12      @ set our frame pointer
-        sub     sp, sp, #STACK_ARGS @ sp on 8-byte boundary
-        
+_start:        
         mapMem          @ salva o endereço virtual em r8
 
 @ codigo para ativar a UART
