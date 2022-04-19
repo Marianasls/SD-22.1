@@ -128,11 +128,11 @@ _start:
 
 @------- Register is the integer part of the baud rate divisor
 
-        mov r0, #325           @ fiz a conta com o clock de refençia sendo 50Mhz
+        mov r0, #32           @ fiz a conta com o clock de refençia sendo 50Mhz para obter um clock de 9600 hz
         str       r0, [r8, #36]    @ o registrador de controle da UART esta na posicao 36(0x24 em hexadecimal)
 
 @------ Register is the fractional part of the baud rate divisor
-        mov r0, #5021          @ fiz a conta com o clock de refençia sendo 50Mhz
+        mov r0, #5521          @ fiz a conta com o clock de refençia sendo 50Mhz para obter um clock de 9600 hz
         str       r0, [r8, #40]    @ o registrador de controle da UART esta na posicao 40(0x28 em hexadecimal)
 
 @------- Registrador de controle da UART
@@ -158,21 +158,10 @@ _start:
         str       r1, [r8, #48]    @ o registrador de controle da UART esta na posicao 48(0x30 em hexadecimal)
         
         @enviando um dado para teste
-        mov       r0, #28          @ parametro
+loop:   mov       r0, #28          @ parametro
         str       r0, [r8, #0]     @ o registrador de dados da UART esta na posicao 0(0x00 em hexadecimal)
+	b	  loop
 
-        mov     r0, 0           @ return 0;
-        add     sp, sp, STACK_ARGS  @ fix sp
-        ldr     r4, [sp, 0]     @ restore r4
-        ldr     r5, [sp, 4]     @      r5
-        ldr     fp, [sp, 8]     @         fp
-        ldr     lr, [sp, 12]    @         lr
-        add     sp, sp, 16      @ restore sp
-        bx      lr              @ return
-        
-        .align  2
-
-_end: 
         mov R0, #0      @ Use 0 return code
         mov R7, #1      @ Command code 1 terminates
         svc 0           @ Linux command to terminate
