@@ -1,2 +1,19 @@
-IP: 10.0.0.103
+pi@10.0.0.104
 senha: raspberry
+
+# compilar:
+as -g -o uart.o uart.s
+ld -o uart uart.o
+# ou
+make
+
+# executar:
+./turnOnLed
+
+# para debugar:
+sudo gdb ./uart
+b num
+r
+
+# para copiar arquivo:
+scp uart.s pi@10.0.0.104:/home/pi/Documents/g01/uart.s

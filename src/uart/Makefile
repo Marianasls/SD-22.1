@@ -1,14 +1,14 @@
-# Arquivo makefile para criar o programa uartgpio
+# Arquivo makefile para criar o programa uart
 
 # link do arquivo objeto para criar o executavel 
-uartgpio: uartgpio.o
-	ld -o uartgpio uartgpio.o
-# gcc -o uartgpio uartgpio.o
+uart: uart.o
+	ld -o uart uart.o
+# gcc -o uart uart.o
 
 # arquivo assembly para criar arquivo objeto
-uartgpio.o: uartgpio.s
-	as -o uartgpio.o uartgpio.s
-# as --gstabs uartgpio.s -o uartgpio.o
+uart.o: uart.s
+	as -g -o uart.o uart.s
+# as --gstabs uart.s -o uart.o
 
 # remove arquivos objetos e de backup
 clean:

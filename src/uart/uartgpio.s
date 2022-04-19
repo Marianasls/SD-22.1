@@ -254,7 +254,7 @@ uart:
 
         mov       r1, #1
         lsl       r1, #2          @ setando o bit da paridade no modo par
-        add       r0, r0, r1      @ configurando a paridade no modo par
+         add       r0, r0, r1      @ configurando a paridade no modo par
 
         mov       r1, #0
         lsl       r1, #3          @ setando o bit que ativa o 2 stop bits

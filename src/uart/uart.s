@@ -8,79 +8,12 @@
         .fpu    neon-fp-armv8
         .syntax unified         @ modern syntax
 
-@ Constants for assembler
-        .equ    STACK_ARGS,8    @ sp already 8-byte aligned
-
-@ MACROS CONSTANTS
-
-        .equ	O_RDONLY, 0
-        .equ	O_WRONLY, 1
-        .equ	O_CREAT,  0100
-        .equ	O_RDWR,   2
-        .equ	O_SYNC,   04010000
-        .equ	O_CLOEXEC, 02000000
-        .equ	S_RDWR,   0666
-        .equ	pagelen, 4096
-        .equ	setregoffset, 28
-        .equ    clrregoffset, 40
-        .equ	PROT_READ, 1
-        .equ	PROT_WRITE, 2
-        .equ	PROT_RDWR, 3
-        .equ	MAP_SHARED, 1
-        .equ    sys_open, 5	@ open and possibly create a file
-        .equ    sys_mmap2, 192	@ map files or devices into memory
-@ END MACROS CONSTANTS
-
-
-@ MACROS --------------------------------------------------------------
-.macro  openFile    fileName
-        ldr         r0, =\fileName
-        ldr         r1, =flags
-	ldr 	    r1, [r1 , 0]
-	mov	    r2, #S_RDWR		@ RW access rights
-        mov	    r7, #sys_open
-        svc         0
-.endm
-
-.macro mapMem
-	openFile	uartFile
-	movs		r4, r0	@ fd for memmap
-	@ check for error and print error msg if necessary
-	BPL		1f  @ pos number file opened ok
-	MOV		R1, #1  @ stdout
-	LDR		R2, =memOpnsz	@ Error msg
-	LDR		R2, [R2 , 0]
-	writeFile	R1, memOpnErr, R2 @ print the error
-	B		_end
-
-@ Setup can call the mmap2 Linux service
-1:	ldr		r5, =#uartaddr	@ address we want / 4096
-	ldr		r5, [r5 , 0]	@ load the address
-	mov		r1, #pagelen	@ size of mem we want
-	mov		r2, #(PROT_READ + PROT_WRITE) @ mem protection options
-
-	@mov		r2, #PROT_RDWR  @ no caso de um possivel erro na linha anterior substituir por essa
-
-	mov		r3, #MAP_SHARED	@ mem share options
-	mov		r0, #0		@ let linux choose a virtual address
-	mov		r7, #sys_mmap2	@ mmap2 service num
-	svc		0		@ call service
-	movs		r8, r0		@ keep the returned virtual address
-	@ check for error and print error msg if necessary
-	BPL		2f  @ pos number file opened ok
-	MOV		R1, #1  @ stdout
-	LDR		R2, =memMapsz	@ Error msg
-	LDR		R2, [R2 , 0]
-	writeFile	R1, memMapErr, R2 @ print the error
-	B		_end
-2:
-.endm
-
-@ END MACROS ----------------------------------------------------------
-
 @ Constant program data
-        .section .rodata
+        .section .data
         .align  2
+
+S_RDWR: 
+        .word   0666
 device:
         .asciz  "/dev/gpiomem"
 uartFile:
@@ -104,6 +37,77 @@ memMapsz:
         .word  .-memMapErr 
         .align  4 @ relign after strings
 
+@ Constants for assembler
+        .equ    STACK_ARGS,8    @ sp already 8-byte aligned
+
+@ MACROS CONSTANTS
+
+        .equ	O_RDONLY, 0
+        .equ	O_WRONLY, 1
+        .equ	O_CREAT,  0100
+        .equ	O_RDWR,   2
+        .equ	O_SYNC,   04010000
+        .equ	O_CLOEXEC, 02000000
+        .equ	pagelen, 4096
+        .equ	setregoffset, 28
+        .equ    clrregoffset, 40
+        .equ	PROT_READ, 1
+        .equ	PROT_WRITE, 2
+        .equ	PROT_RDWR, 3
+        .equ	MAP_SHARED, 1
+        .equ    sys_open, 5	@ open and possibly create a file
+        .equ    sys_mmap2, 192	@ map files or devices into memory
+@ END MACROS CONSTANTS
+
+
+@ MACROS --------------------------------------------------------------
+.macro  openFile    fileName
+        ldr         r0, =\fileName
+        ldr         r1, =flags
+	ldr 	    r1, [r1 , 0]
+	ldr	    r2, =S_RDWR		@ RW access rights
+        mov	    r7, #sys_open
+        svc         0
+.endm
+
+.macro mapMem
+	openFile	uartFile
+	movs		r4, r0	@ fd for memmap
+	@ check for error and print error msg if necessary
+	BPL		1  @ pos number file opened ok
+	MOV		R1, #1  @ stdout
+	LDR		R2, =memOpnsz	@ Error msg
+	LDR		R2, [R2 , 0]
+	writeFile	R1, memOpnErr, R2 @ print the error
+	B		_end
+
+@ Setup can call the mmap2 Linux service
+1:	ldr		r5, =#uartaddr	@ address we want / 4096
+	ldr		r5, [r5 , 0]	@ load the address
+	mov		r1, #pagelen	@ size of mem we want
+	@mov		r2, #(PROT_READ + PROT_WRITE) @ mem protection options
+
+	mov		r2, #PROT_RDWR  @ no caso de um possivel erro na linha anterior substituir por essa
+
+	mov		r3, #MAP_SHARED	@ mem share options
+	mov		r0, #0		@ let linux choose a virtual address
+	mov		r7, #sys_mmap2	@ mmap2 service num
+	svc		0		@ call service
+	movs		r8, r0		@ keep the returned virtual address
+	@ check for error and print error msg if necessary
+	BPL		2  @ pos number file opened ok
+	MOV		R1, #1  @ stdout
+	LDR		R2, =memMapsz	@ Error msg
+	LDR		R2, [R2 , 0]
+	writeFile	R1, memMapErr, R2 @ print the error
+	B		_end
+2:
+.endm
+
+@ END MACROS ----------------------------------------------------------
+
+
+
 @ The program
         .text
         .align  2
@@ -117,7 +121,7 @@ _start:
         add     fp, sp, #12      @ set our frame pointer
         sub     sp, sp, #STACK_ARGS @ sp on 8-byte boundary
         
-        mapMem // salva o endereço virtual em r8
+        mapMem          @ salva o endereço virtual em r8
 
 @ codigo para ativar a UART
         @ desligando a UART
@@ -125,10 +129,11 @@ _start:
         str       r0, [r8, #48]    @ o registrador de controle da UART esta na posicao 48(0x30 em hexadecimal)
 
 @ desativa FIFO
-        ldr       r0, #0
-        mov       r1, #0
+        ldr r0, [r8, #44]
+        mov       r1, #1
         lsl       r1, #4          @ setando o bit que ativa a fifo
-        add       r0, r0, r1      @ configurando bit para desativar fifo
+        bic       r0, r1         @ setando o bit que ativa a fifo
+        @add       r0, r0, r1      @ configurando bit para desativar fifo
         str       r0, [r8, #44]
 
 @----- UARTLCR_ LCRH Register is the line control register
@@ -167,11 +172,13 @@ _start:
 
 @------- Register is the integer part of the baud rate divisor
 
-        mov r0, #6510   // fiz a conta com o clock de refençia sendo 1Ghz
+        @mov r0, #6510           @ fiz a conta com o clock de refençia sendo 1Ghz
+        mov r0, #1
         str       r0, [r8, #36]    @ o registrador de controle da UART esta na posicao 36(0x24 em hexadecimal)
 
 @------ Register is the fractional part of the baud rate divisor
-        mov r0, #4167   // fiz a conta com o clock de refençia sendo 1Ghz
+        @mov r0, #4167           @ fiz a conta com o clock de refençia sendo 1Ghz
+        mov r0, #0x28
         str       r0, [r8, #40]    @ o registrador de controle da UART esta na posicao 40(0x28 em hexadecimal)
 
 @------- Registrador de controle da UART
@@ -211,3 +218,8 @@ _start:
         bx      lr              @ return
         
         .align  2
+
+_end: 
+        mov R0, #0      @ Use 0 return code
+        mov R7, #1      @ Command code 1 terminates
+        svc 0           @ Linux command to terminate
