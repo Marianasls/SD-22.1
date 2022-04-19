@@ -2,18 +2,13 @@ pi@10.0.0.104
 senha: raspberry
 
 # compilar:
-as -g -o uart.o uart.s
-ld -o uart uart.o
+as -g -o main.o main.s
+ld -o main main.o
 # ou
 make
 
 # executar:
-./turnOnLed
+sudo ./main
 
 # para debugar:
-sudo gdb ./uart
-b num
-r
-
-# para copiar arquivo:
-scp uart.s pi@10.0.0.104:/home/pi/Documents/g01/uart.s
+sudo gdb ./main
