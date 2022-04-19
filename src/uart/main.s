@@ -1,7 +1,6 @@
-@ IOmemory.s
-@ Opens the /dev/gpiomem device and maps GPIO memory
-@ into program virtual address space.
-@ 2017-09-29: Bob Plantz 
+@ Problema 1 - Linguagem Assembly
+@ Programa responsável por ativar a comunicação uart e enviar dados
+@ Autores: Anderson, Esther, Mariana.
 
 @ Define my Raspberry Pi
         .cpu    cortex-a53
@@ -17,31 +16,20 @@ S_RDWR:
 device:
         .asciz  "/dev/gpiomem"
 uartFile:
-        .asciz  "/dev/ttyAMA0" @ ver https://www.raspberrypi.com/documentation/computers/configuration.html#primary-and-secondary-uart
+        .asciz  "/dev/mem" @ ver https://www.raspberrypi.com/documentation/computers/configuration.html#primary-and-secondary-uart
 fdMsg:
         .asciz  "File descriptor = %i\n"
 memMsg:
         .asciz  "Using memory at %p\n"
-
 uartaddr:
         .word   0x20201
 flags: 
         .word O_RDWR+O_SYNC+O_CLOEXEC
-memOpnErr:     
-        .asciz  "Failed to open /dev/ttyAMA0\n"
-memOpnsz:      
-        .word  .-memOpnErr 
-memMapErr:     
-        .asciz  "Failed to map memory\n"
-memMapsz:      
-        .word  .-memMapErr 
-        .align  4 @ relign after strings
 
 @ Constants for assembler
         .equ    STACK_ARGS,8    @ sp already 8-byte aligned
 
 @ MACROS CONSTANTS
-
         .equ	O_RDONLY, 0
         .equ	O_WRONLY, 1
         .equ	O_CREAT,  0100
@@ -74,7 +62,7 @@ memMapsz:
 	openFile	uartFile
 	movs		r4, r0	@ fd for memmap
 	@ check for error and print error msg if necessary
-	BPL		1  @ pos number file opened ok
+	BPL		1f  @ pos number file opened ok
 	MOV		R1, #1  @ stdout
 	LDR		R2, =memOpnsz	@ Error msg
 	LDR		R2, [R2 , 0]
@@ -87,7 +75,7 @@ memMapsz:
 	mov		r1, #pagelen	@ size of mem we want
 	@mov		r2, #(PROT_READ + PROT_WRITE) @ mem protection options
 
-	mov		r2, #PROT_RDWR  @ no caso de um possivel erro na linha anterior substituir por essa
+	mov		r2, #PROT_RDWR  @ usar essa linha ou a linha de cima
 
 	mov		r3, #MAP_SHARED	@ mem share options
 	mov		r0, #0		@ let linux choose a virtual address
@@ -95,7 +83,7 @@ memMapsz:
 	svc		0		@ call service
 	movs		r8, r0		@ keep the returned virtual address
 	@ check for error and print error msg if necessary
-	BPL		2  @ pos number file opened ok
+	BPL		2f  @ pos number file opened ok
 	MOV		R1, #1  @ stdout
 	LDR		R2, =memMapsz	@ Error msg
 	LDR		R2, [R2 , 0]
@@ -106,14 +94,12 @@ memMapsz:
 
 @ END MACROS ----------------------------------------------------------
 
-
-
 @ The program
         .text
         .align  2
         .global _start
 _start:
-        sub     sp, sp, 16      @ space for saving regs
+        sub     sp, sp,       @ space for saving regs
         str     r4, [sp, #0]     @ save r4
         str     r5, [sp, #4]     @      r5
         str     fp, [sp, #8]     @      fp
@@ -172,13 +158,11 @@ _start:
 
 @------- Register is the integer part of the baud rate divisor
 
-        @mov r0, #6510           @ fiz a conta com o clock de refençia sendo 1Ghz
-        mov r0, #1
+        mov r0, #325           @ fiz a conta com o clock de refençia sendo 50Mhz
         str       r0, [r8, #36]    @ o registrador de controle da UART esta na posicao 36(0x24 em hexadecimal)
 
 @------ Register is the fractional part of the baud rate divisor
-        @mov r0, #4167           @ fiz a conta com o clock de refençia sendo 1Ghz
-        mov r0, #0x28
+        mov r0, #5021          @ fiz a conta com o clock de refençia sendo 50Mhz
         str       r0, [r8, #40]    @ o registrador de controle da UART esta na posicao 40(0x28 em hexadecimal)
 
 @------- Registrador de controle da UART
@@ -189,7 +173,6 @@ _start:
         @ o 9º bit é RXE (receive enable)
 
         mov       r0, #1           @ primeiro bit é o UARTEN  que ativa a UART quando tiver valor 1
-
         mov       r1, #1
         lsl       r1, #8           @ setando o bit de transmissão
         add       r0, r0, r1       @ configurando a ativação da transmissão
@@ -198,14 +181,14 @@ _start:
         lsl       r1, #9           @ setando o bit de recepção
         add       r0, r0, r1       @ configurando a ativação da recepção
 
-        mov       r1, #1        @ parametro
+        mov       r1, #1           @ parametro
         lsl       r1, #7           @ setando o bit de loopback
         add       r0, r0, r1       @ configurando a ativação do loopback
 
         str       r1, [r8, #48]    @ o registrador de controle da UART esta na posicao 48(0x30 em hexadecimal)
         
         @enviando um dado para teste
-        mov       r0, #28       @ parametro
+        mov       r0, #28          @ parametro
         str       r0, [r8, #0]     @ o registrador de dados da UART esta na posicao 0(0x00 em hexadecimal)
 
         mov     r0, 0           @ return 0;

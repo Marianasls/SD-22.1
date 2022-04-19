@@ -1,15 +1,13 @@
-# Arquivo makefile para criar o programa uart
+# Arquivo makefile para criar o programa main, responsável por ativar comunicação uart
 
 # link do arquivo objeto para criar o executavel 
-uart: uart.o
-	ld -o uart uart.o
-# gcc -o uart uart.o
+main: main.o
+	ld -o main main.o
 
 # arquivo assembly para criar arquivo objeto
-uart.o: uart.s
-	as -g -o uart.o uart.s
-# as --gstabs uart.s -o uart.o
+main.o: main.s
+	as -g -o main.o main.s
 
-# remove arquivos objetos e de backup
+# remove arquivos objetos
 clean:
-	rm -i *.o *~
+	rm -i *.o
