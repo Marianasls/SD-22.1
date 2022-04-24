@@ -10,7 +10,10 @@
 @ Constant program data
         .section .data
         .align  2
-
+baud:
+        .word 0x13
+rate:   
+        .word 
 S_RDWR: 
         .word   0666
 device:
@@ -59,10 +62,7 @@ flags:
 	ldr		r5, =#uartaddr	@ address we want / 4096
 	ldr		r5, [r5 , 0]	@ load the address
 	mov		r1, #pagelen	@ size of mem we want
-	@mov		r2, #(PROT_READ + PROT_WRITE) @ mem protection options
-
-	mov		r2, #PROT_RDWR  @ usar essa linha ou a linha de cima
-
+	mov		r2, #PROT_RDWR  @ mem protection options
 	mov		r3, #MAP_SHARED	@ mem share options
 	mov		r0, #0		@ let linux choose a virtual address
 	mov		r7, #sys_mmap2	@ mmap2 service num
@@ -85,11 +85,10 @@ _start:
         str       r0, [r8, #48]    @ o registrador de controle da UART esta na posicao 48(0x30 em hexadecimal)
 
 @ desativa FIFO
-        ldr r0, [r8, #44]
+        ldr       r0, [r8, #44]
         mov       r1, #1
         lsl       r1, #4          @ setando o bit que ativa a fifo
         bic       r0, r1         @ setando o bit que ativa a fifo
-        @add       r0, r0, r1      @ configurando bit para desativar fifo
         str       r0, [r8, #44]
 
 @----- UARTLCR_ LCRH Register is the line control register
@@ -128,11 +127,11 @@ _start:
 
 @------- Register is the integer part of the baud rate divisor
 
-        mov r0, #32           @ fiz a conta com o clock de refençia sendo 50Mhz para obter um clock de 9600 hz
+        mov r0, #13                @ fiz a conta com o clock de refençia sendo 50Mhz para obter um clock de 9600 hz
         str       r0, [r8, #36]    @ o registrador de controle da UART esta na posicao 36(0x24 em hexadecimal)
 
 @------ Register is the fractional part of the baud rate divisor
-        mov r0, #5521          @ fiz a conta com o clock de refençia sendo 50Mhz para obter um clock de 9600 hz
+        mov r0, #22          @ fiz a conta com o clock de refençia sendo 50Mhz para obter um clock de 9600 hz
         str       r0, [r8, #40]    @ o registrador de controle da UART esta na posicao 40(0x28 em hexadecimal)
 
 @------- Registrador de controle da UART
@@ -147,7 +146,7 @@ _start:
         lsl       r1, #8           @ setando o bit de transmissão
         add       r0, r0, r1       @ configurando a ativação da transmissão
 
-        mov       r1, #0
+        mov       r1, #1
         lsl       r1, #9           @ setando o bit de recepção
         add       r0, r0, r1       @ configurando a ativação da recepção
 
@@ -155,7 +154,7 @@ _start:
         lsl       r1, #7           @ setando o bit de loopback
         add       r0, r0, r1       @ configurando a ativação do loopback
 
-        str       r1, [r8, #48]    @ o registrador de controle da UART esta na posicao 48(0x30 em hexadecimal)
+        str       r0, [r8, #48]    @ o registrador de controle da UART esta na posicao 48(0x30 em hexadecimal)
         
         @enviando um dado para teste
 loop:   mov       r0, #28          @ parametro
