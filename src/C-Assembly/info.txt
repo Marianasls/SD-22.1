@@ -1,0 +1,10 @@
+# compilar assembly:
+as -g -o say_hi.o say_hi.s
+ld -o say_hi say_hi.o
+
+# compilar c:
+gcc example.c say_hi.o -o hello
+
+# executar arquivo em c que chama o código assembly
+./hello
+
