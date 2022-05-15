@@ -14,8 +14,7 @@ module uart_receiver
    input        i_Clock,
    input        i_Rx_Serial,
    output       o_Rx_DV,
-   output [7:0] o_Rx_Byte,
-	output [2:0] o_SM_Main
+   output [7:0] o_Rx_Byte
    );
     
   parameter s_IDLE         = 3'b000;
@@ -31,7 +30,7 @@ module uart_receiver
   reg [2:0]     r_Bit_Index   = 0; //8 bits total
   reg [7:0]     r_Rx_Byte     = 0;
   reg           r_Rx_DV       = 0;
-  reg [2:0]     r_SM_Main     = 3'b000;
+  reg [2:0]     r_SM_Main     = 0;
    
   // Purpose: Double-register the incoming data.
   // This allows it to be used in the UART RX Clock Domain.
@@ -139,10 +138,9 @@ module uart_receiver
           r_SM_Main <= s_IDLE;
          
       endcase
-    end
-	 
+    end   
+   
   assign o_Rx_DV   = r_Rx_DV;
   assign o_Rx_Byte = r_Rx_Byte;
-  assign o_SM_Main = r_SM_Main;
    
 endmodule // uart_rx
