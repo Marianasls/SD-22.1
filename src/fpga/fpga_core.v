@@ -1,15 +1,14 @@
 // Este modulo contém a maquina de estados que implementar toda a logica do sistema na fpga
 // e segue o protocolo de comunicação definido.
   
-module fpga_core
-  (
+module fpga_core (
    input        i_Clock,
    input [7:0]  i_Rx_Data,// dados recebidos pela uart
    input        i_Rx_Done, // recebimento de dados da uart concluido
    input [39:0] i_Dth_Data,// dados recebidos pela dth11
    input        i_Dth_Done,// recebimento de dados do dth11 concluido
    input        i_Dth_Error,// erro no sensor dth11
-   input        o_Tx_Done,// transmissao de dados da uart concluida
+   input        i_Tx_Done,// transmissao de dados da uart concluida
 
    output [7:0] o_Tx_Data,
    output       o_Tx_Start,
@@ -43,13 +42,15 @@ module fpga_core
   parameter cs_TEMPERATURE = 8'h02;
 
   reg [3:0]  r_state = s_IDLE;
-  reg [2:0]  r_CR = 0;// comando recebido
+  reg [7:0]  r_CR = 0;// comando recebido
   reg [7:0]  r_dth_integral = 0;
   reg [7:0]  r_dth_decimal = 0;
+  reg [7:0]  r_dth_status = 0;
   reg [7:0]  r_tx_data = 0;
   reg        r_tx_start = 0;
   reg        r_dth_start = 0;
   reg        r_Rx_Done = 0;
+  reg 		   r_tx_done = 0;
 
   always @(posedge i_Clock)
     begin
@@ -118,8 +119,87 @@ module fpga_core
             r_tx_start    <= 1;
             r_state       <= s_IDLE;
           end // case: s_RX_COMMAND_E
-         
-        default :
+		
+        s_DTH_START: 
+          begin
+            r_dth_start <= 1;
+            r_state <= s_DTH_DONE;
+          end 
+        // case: s_DTH_START
+        
+        s_DTH_DONE:
+        // 0 - 7: temperatura integral
+        // 8 - 15: temperatura decimal
+        // 16 - 23: umidade integral
+        // 24 - 31: umidade decimal
+          begin
+            if(i_Dth_Done == 1'b1) begin
+              r_dth_start <= 0;
+              r_state <= s_TX_COMMAND;
+              r_dth_status <= cs_DTH_OKAY;
+              if (r_CR == cr_TEMPERATURE) begin
+                r_dth_integral <= i_Dth_Data[7:0];
+                r_dth_decimal <= i_Dth_Data[15:8];
+              end
+              else if (r_CR == cr_HUMIDITY) begin
+                r_dth_integral <= i_Dth_Data[23:16];
+                r_dth_decimal <= i_Dth_Data[31:24];
+              end
+            end
+            else if (i_Dth_ERROR == 1'b1) begin
+              r_dth_start <= 0;
+              r_state <= s_TX_COMMAND;7
+              r_dth_status <= cs_DTH_ERROR;
+            end 
+          end
+        // case: s_DTH_DONE
+        
+        s_TX_COMMAND:
+          begin
+            if (r_CR == cr_TEMPERATURE) begin 
+              r_tx_data <= cs_TEMPERATURE;
+              r_state <= s_TX_INTEGRAL;
+            end
+            else if (r_CR == cr_HUMIDITY) begin
+              r_tx_data <= cs_HUMIDITY;
+              r_state <= s_TX_INTEGRAL;
+            end
+            else 
+              begin
+                r_tx_data <= r_dth_status;
+                r_state <= s_IDLE;
+              end 
+              
+            r_TX_start	<= 1;
+          end
+        // case: s_TX_COMMAND
+        
+        s_TX_INTEGRAL:
+          begin
+            r_Tx_start <= 0;
+            if(i_Tx_Done == 1'b1) begin
+              r_tx_data <= r_dth_integral;
+              r_Tx_start <= 1;
+              r_state <= s_TX_DECIMAL;
+            end	
+            r_tx_done <= i_Tx_Done;
+          end
+        // case: s_TX_INTEGRAL
+        
+        
+        s_TX_DECIMAL:
+          begin
+            r_TX_start	<= 0;
+            if(r_tx_done == 1'b0 && i_Tx_Done == 1'b1) begin
+              r_tx_data <= r_dth_decimal;
+              r_Tx_start <= 1;
+              r_state <= s_IDLE;
+            end
+            r_tx_done <= i_Tx_Done;
+          end
+        // case: s_TX_DECIMAL
+			
+		    default :
           r_state <= s_IDLE;
          
       endcase
