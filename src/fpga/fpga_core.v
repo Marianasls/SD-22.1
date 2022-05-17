@@ -146,9 +146,9 @@ module fpga_core (
                 r_dth_decimal <= i_Dth_Data[31:24];
               end
             end
-            else if (i_Dth_ERROR == 1'b1) begin
+            else if (i_Dth_Error == 1'b1) begin
               r_dth_start <= 0;
-              r_state <= s_TX_COMMAND;7
+              r_state <= s_TX_COMMAND;
               r_dth_status <= cs_DTH_ERROR;
             end 
           end
@@ -170,16 +170,16 @@ module fpga_core (
                 r_state <= s_IDLE;
               end 
               
-            r_TX_start	<= 1;
+            r_tx_start	<= 1;
           end
         // case: s_TX_COMMAND
         
         s_TX_INTEGRAL:
           begin
-            r_Tx_start <= 0;
+            r_tx_start <= 0;
             if(i_Tx_Done == 1'b1) begin
               r_tx_data <= r_dth_integral;
-              r_Tx_start <= 1;
+              r_tx_start <= 1;
               r_state <= s_TX_DECIMAL;
             end	
             r_tx_done <= i_Tx_Done;
@@ -189,10 +189,10 @@ module fpga_core (
         
         s_TX_DECIMAL:
           begin
-            r_TX_start	<= 0;
+            r_tx_start	<= 0;
             if(r_tx_done == 1'b0 && i_Tx_Done == 1'b1) begin
               r_tx_data <= r_dth_decimal;
-              r_Tx_start <= 1;
+              r_tx_start <= 1;
               r_state <= s_IDLE;
             end
             r_tx_done <= i_Tx_Done;
