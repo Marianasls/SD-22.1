@@ -36,18 +36,20 @@ module fpga_core
   parameter cr_HUMIDITY = 8'h05;
 
   // comandos de resposta
+  parameter cs_COMMAND_ERROR = 8'h2f;
   parameter cs_DTH_ERROR = 8'h1f;
   parameter cs_DTH_OKAY = 8'h00;
   parameter cs_HUMIDITY = 8'h01;
   parameter cs_TEMPERATURE = 8'h02;
 
-  reg [2:0]  r_state = s_IDLE;
+  reg [3:0]  r_state = s_IDLE;
   reg [2:0]  r_CR = 0;// comando recebido
   reg [7:0]  r_dth_integral = 0;
   reg [7:0]  r_dth_decimal = 0;
   reg [7:0]  r_tx_data = 0;
   reg        r_tx_start = 0;
   reg        r_dth_start = 0;
+  reg        r_Rx_Done = 0;
 
   always @(posedge i_Clock)
     begin
@@ -55,10 +57,11 @@ module fpga_core
       case (r_state)
         s_IDLE :
           begin
-            r_tx_data     <= 0;
-            r_tx_start    <= 0;
-            r_dth_start   <= 0;
-             
+            r_tx_data     = 0;
+            r_tx_start    = 0;
+            r_dth_start   = 0;
+            r_Rx_Done     = i_Rx_Done;
+
             if (i_Rx_Done == 1'b1)
               begin
                 if(i_Rx_Data == ADDRESS)
@@ -66,9 +69,55 @@ module fpga_core
                 else
                   r_state   <= s_RX_ADDRESS_E;
               end
-            else
-              r_state <= s_IDLE;
           end // case: s_IDLE
+
+        s_RX_ADDRESS :
+          begin
+            r_tx_data     = 0;
+            r_tx_start    = 0;
+            r_dth_start   = 0;
+             
+            if (r_Rx_Done == 1'b0 && i_Rx_Done == 1'b1)
+              begin
+                  r_state   <= s_RX_COMMAND;
+              end
+
+            r_Rx_Done     = i_Rx_Done;
+          end // case: s_RX_ADDRESS
+
+        s_RX_ADDRESS_E :// endereco invalido, aguarda receber a informacao do comando que deve ser ignorada
+          begin
+            r_tx_data     = 0;
+            r_tx_start    = 0;
+            r_dth_start   = 0;
+             
+				    if (r_Rx_Done == 1'b0 && i_Rx_Done == 1'b1)
+              begin
+                  r_state   <= s_IDLE;
+              end
+
+            r_Rx_Done     = i_Rx_Done;
+          end // case: s_RX_ADDRESS_E
+        
+        s_RX_COMMAND :
+          begin
+            if (i_Rx_Data == cr_DTH_STATUS || i_Rx_Data == cr_TEMPERATURE || i_Rx_Data == cr_HUMIDITY)
+              begin
+                r_CR      = i_Rx_Data; // armazena o comando recebido, para ser usado posteriormente
+                r_state   = s_DTH_START;
+              end
+            else
+              begin
+                r_state   <= s_RX_COMMAND_E;
+              end
+          end // case: s_RX_COMMAND
+
+        s_RX_COMMAND_E :// comando invalido, envia resposta de erro e retorna ao estado inicial
+          begin
+            r_tx_data     <= cs_COMMAND_ERROR;
+            r_tx_start    <= 1;
+            r_state       <= s_IDLE;
+          end // case: s_RX_COMMAND_E
          
         default :
           r_state <= s_IDLE;
