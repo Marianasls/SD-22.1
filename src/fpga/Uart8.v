@@ -35,7 +35,7 @@ wire rxEn = 1;
 //parameter wire [7:0] in = 0;
 wire [7:0] out;
 wire rxDone;
-parameter txStart = 0;
+reg txStart = 0;
 
 BaudRateGenerator #(
     .CLOCK_RATE(CLOCK_RATE),
@@ -66,7 +66,7 @@ Uart8Transmitter txInst (
     .busy(txBusy)
 );
 
-always (@posedge clk || @posedge rxClk )
+always @(posedge clk)
 	begin
 		txStart <= rxDone;
 	end
