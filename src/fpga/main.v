@@ -33,3 +33,6 @@ fpga_core controlInst (
   .o_Tx_Start(o_Tx_Start),
   .o_Dth_Start(o_Dth_Start),
 );
+
+
+endmodule
