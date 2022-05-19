@@ -124,7 +124,7 @@ always @ (posedge clk_1M or negedge rst_n) begin
               end
             end
               else                      
-                next_state <= st_delay;
+                next_state <= S_DEALY;
             end 
                 
             S_LOW_83US:   
@@ -177,22 +177,22 @@ always @ (posedge clk_1M or negedge rst_n) begin
                     end
                 endcase
                 
-                if(data_cnt == 40)                                      //check data bit
+                if(data_count == 40)                                      //check data bit
 					 begin  
-                 next_state <= st_delay;
+                 next_state <= S_DEALY;
                  if(data_temp[7:0] == data_temp[39:32] + data_temp[31:24] + data_temp[23:16] + data_temp[15:8])
                    data_valid <= data_temp[39:8];  
                 end
             end 
                 
-            S_DELAY:                                      // after data received delay 2s
+            S_DEALY:                                      // after data received delay 2s
 				begin
              if(count_1us < 2000_000)
-              us_cnt_clr <= 1'b0;
+              us_clear <= 1'b0;
              else
 				 begin                 
               next_state <= S_LOW_20MS;              // send signal again
-              us_cnt_clr <= 1'b1;
+              us_clear <= 1'b1;
              end
            end
             default :

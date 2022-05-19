@@ -12,22 +12,30 @@ module Uart8  #(
 
     // rx interface
     input wire rx,
-    input wire rxEn,
-    output wire [7:0] out,
-    output wire rxDone,
+    //input wire rxEn ,
+    //output wire [7:0] out,
+    //output wire rxDone,
     output wire rxBusy,
     output wire rxErr,
 
     // tx interface
     output wire tx,
-    input wire txEn,
-    input wire txStart,
-    input wire [7:0] in,
+    //input wire txEn,
+    //input wire txStart,
+    //input wire [7:0] in,
     output wire txDone,
     output wire txBusy
+	 
 );
 wire rxClk;
 wire txClk;
+wire txEn = 1;
+wire rxEn = 1;
+
+//parameter wire [7:0] in = 0;
+wire [7:0] out;
+wire rxDone;
+reg txStart = 0;
 
 BaudRateGenerator #(
     .CLOCK_RATE(CLOCK_RATE),
@@ -52,10 +60,15 @@ Uart8Transmitter txInst (
     .clk(txClk),
     .en(txEn),
     .start(txStart),
-    .in(in),
+    .in(out),
     .out(tx),
     .done(txDone),
     .busy(txBusy)
 );
+
+always @(posedge clk)
+	begin
+		txStart <= rxDone;
+	end
 
 endmodule
