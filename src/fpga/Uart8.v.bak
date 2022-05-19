@@ -35,7 +35,6 @@ wire rxEn = 1;
 //parameter wire [7:0] in = 0;
 wire [7:0] out;
 wire rxDone;
-parameter txStart = 0;
 
 BaudRateGenerator #(
     .CLOCK_RATE(CLOCK_RATE),
@@ -59,16 +58,11 @@ Uart8Receiver rxInst (
 Uart8Transmitter txInst (
     .clk(txClk),
     .en(txEn),
-    .start(txStart),
+    .start(rxDone),
     .in(out),
     .out(tx),
     .done(txDone),
     .busy(txBusy)
 );
-
-always (@posedge clk || @posedge rxClk )
-	begin
-		txStart <= rxDone;
-	end
 
 endmodule
