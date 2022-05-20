@@ -6,6 +6,9 @@
 #include <wiringSerial.h>
 #include <termios.h>
 
+#define ADDR "/dev/ttyAMA0"
+#define BAUD_RATE 9600
+
 struct termios options ;
 void init_wiringSerial(int fd) {
   tcgetattr (fd, &options) ;   // Read current options
@@ -38,35 +41,39 @@ int read_serial_int (int fd) {
 
 int main() {
   int serial_port;
-  int req, code_req, sensor_addr;
+  int req, code_req=0, sensor_addr;
   char dat;
   int integral_part, decimal_part;
-  printf("-------------------------------------\n");
-  printf("-----------------MENU----------------\n");
-  printf("-------------------------------------\n");
-  printf("1 - Status do Sensor.\n");
-  printf("2 - Temperatura.\n");
-  printf("3 - Umidade.\n");
-  scanf("%d", &req);
-  printf("Endereço do sensor: (De 0 a 31)");
-  scanf("%d", &sensor_addr);
 
-  switch (req)
-  {
-  case 1:
-    code_req = 3;
-    break;
-  case 2:
-    code_req = 4;
-    break;
-  case 3:
-    code_req = 5;
-    break;
-  default:
-    printf("Inválido");
-    break;
+  while(!code_req) {
+    system("cls");
+    printf("-------------------------------------\n");
+    printf("-----------------MENU----------------\n");
+    printf("-------------------------------------\n");
+    printf("1 - Status do Sensor.\n");
+    printf("2 - Temperatura.\n");
+    printf("3 - Umidade.\n");
+    scanf("%d", &req);
+    printf("Endereço do sensor: (De 0 a 31)");
+    scanf("%d", &sensor_addr);
+    
+    switch (req) {
+      case 1:
+        code_req = 3;
+        break;
+      case 2:
+        code_req = 4;
+        break;
+      case 3:
+        code_req = 5;
+        break;
+      default:
+        printf("Inválido\n");
+        break;
+    }
   }
-  if ((serial_port = serialOpen("/dev/ttyAMA0", 9600)) < 0) /* open serial port */
+
+  if ((serial_port = serialOpen(ADDR, BAUD_RATE)) < 0) /* open serial port */
   {
     fprintf(stderr, "Unable to open serial device: %s\n", strerror(errno));
     return 1;
@@ -81,23 +88,29 @@ int main() {
   }
   // comando de requisição 
   fflush(stdout);
-  serialPutchar(serial_port, code_req);
   serialPutchar(serial_port, sensor_addr);
+  serialPutchar(serial_port, code_req);
 
   // comando de resposta
-  if (code_req != 3) {  // solicita dados do sensor
 
-    if (serialDataAvail(serial_port)) {
+  if (serialDataAvail(serial_port)) {
+    //dat = serialGetchar (serial_port);        /* receive character serially*/
+    if (code_req != 3)   // solicita dados do sensor
+    {
       integral_part = read_serial_int(serial_port);
       decimal_part = read_serial_int(serial_port);
-      //dat = serialGetchar (serial_port);        /* receive character serially*/
-      printf ("%d,%d", integral_part, decimal_part);
-     
+      if (code_req == 4) 
+        printf("Temperatura: ");
+      else 
+        printf("Umidade: ");
+      printf ("%d,%d\n", integral_part, decimal_part);
+    }
+    else { //solicita status do sensor
+      int status = read_serial_int(serial_port);
+      if(status == 31)
+      printf ("Status do sensor: %d\n", status);
     }
   }
-  else { //solicita status do sensor
-    int status = read_serial_int(serial_port);
-    printf ("Status do sensor: %d\n", status);
-  }
+  
   return 0;
 }
