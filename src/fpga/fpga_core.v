@@ -5,7 +5,7 @@ module fpga_core (
    input        i_Clock,
    input [7:0]  i_Rx_Data,// dados recebidos pela uart
    input        i_Rx_Done, // recebimento de dados da uart concluido
-   input [39:0] i_Dth_Data,// dados recebidos pela dth11
+   input [31:0] i_Dth_Data,// dados recebidos pela dth11
    input        i_Dth_Done,// recebimento de dados do dth11 concluido
    input        i_Dth_Error,// erro no sensor dth11
    input        i_Tx_Done,// transmissao de dados da uart concluida
