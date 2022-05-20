@@ -2,36 +2,69 @@
 // Faz a integração entre todas as funcionalidades do sistema
 // conecta a maquina de estados fpga_core com a parte da uart e a parte do sensor DHT11
 
+
 module main (
   // inputs
   input        i_Clock,
-  input [7:0]  i_Rx_Data, // dados recebidos pela uart
-  input        i_Rx_Done, // recebimento de dados da uart concluido
-  input [39:0] i_Dth_Data, // dados recebidos pela dth11
-  input        i_Dth_Done, // recebimento de dados do dth11 concluido
-  input        i_Dth_Error, // erro no sensor dth11
-  input        i_Tx_Done, // transmissao de dados da uart concluida
-  
-  //outputs
-  output [7:0] o_Tx_Data,
-  output       o_Tx_Start,
-  output       o_Dth_Start
+  input  		rx,
+  input  		tx,
+  inout			dht11,
+  //input			resetSensor,
+  output 	   rxBusy, // recebendo dados
+  output 	   txBusy, // transmitindo dados
+  output			rxError
 );
 
 //parameters
+wire txEn = 1;
+wire rxEn = 1;
+wire [7:0] uartOut;
+wire [7:0] uartIn; 
+wire [31:0] sensorData; 
+wire rxDone;
+wire txDone;
+wire txStart;
+wire sensorDone, sensorError;
 
 // importações
+Uart8 uartInst (
+	 .clk(i_Clock),
+    // rx interface
+    .rx(rx),
+    .rxEn(rxEn),
+    .out(uartOut),
+    .rxDone(rxDone),
+    .rxBusy(rxBusy),
+    .rxErr(rxError),
+    // tx interface
+    .tx(tx),
+    .txEn(txEn),
+    .txStart(txStart),
+    .in(uartIn),
+    .txDone(txDone),
+    .txBusy(txBusy)
+);
+
+dht11  sensorInst (
+    .clk(i_Clock),   
+    .rst_n(resetSensor),                                   
+    .dht11(dht11),   
+    .data_valid(sensorData),
+	 .done(sensorDone),
+	 .erro(sensorError)
+);
+
 fpga_core controlInst (
   .i_Clock(i_Clock),
-  .i_Rx_Data(i_Rx_Data),
-  .i_Rx_Done(i_Rx_Done),
-  .i_Dth_Data(i_Dth_Data),
-  .i_Dth_Done(i_Dth_Done),
-  .i_Dth_Error(i_Dth_Error),
-  .i_Tx_Done(i_Tx_Done),
-  .o_Tx_Data(o_Tx_Data),
-  .o_Tx_Start(o_Tx_Start),
-  .o_Dth_Start(o_Dth_Start),
+  .i_Rx_Data(uartOut),
+  .i_Rx_Done(rxDone),
+  .i_Dth_Data(sensorData),
+  .i_Dth_Done(sensorDone),
+  .i_Dth_Error(sensorError),
+  .i_Tx_Done(txDone),
+  .o_Tx_Data(uartIn),
+  .o_Tx_Start(txStart),
+  .o_Dth_Start(resetSensor),
 );
 
 
