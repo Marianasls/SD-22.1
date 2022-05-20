@@ -5,7 +5,9 @@ module dht11(
     input               clk,   
     input               rst_n,                                   
     inout               dht11,   
-    output  reg  [31:0] data_valid     
+    output  reg  [31:0] data_valid,
+	 output	reg			done,
+	 output 	reg			erro
 ); 
 /**************parameter********************/              
 parameter  POWER_ON_NUM     = 1000_000;              
@@ -29,8 +31,13 @@ reg        us_clear;
 reg        state;        
 reg        dht_buffer;        
 reg        dht_d0;        
-reg        dht_d1;        
-               
+reg        dht_d1;
+        
+initial begin
+	  erro <= 1'b0;
+	  done <= 1'b0;
+ end
+ 
 wire       dht_podge;        //data posedge
 wire       dht_nedge;        //data negedge
 /*********************main codes*********************/
@@ -181,7 +188,16 @@ always @ (posedge clk_1M or negedge rst_n) begin
 					 begin  
                  next_state <= S_DEALY;
                  if(data_temp[7:0] == data_temp[39:32] + data_temp[31:24] + data_temp[23:16] + data_temp[15:8])
-                   data_valid <= data_temp[39:8];  
+							begin
+								data_valid <= data_temp[39:8];
+								done <= 1'b1;
+								erro <= 1'b0;
+							end
+						else
+							begin
+								done <= 1'b0;
+								erro <= 1'b1;
+							end
                 end
             end 
                 
@@ -193,6 +209,8 @@ always @ (posedge clk_1M or negedge rst_n) begin
 				 begin                 
               next_state <= S_LOW_20MS;              // send signal again
               us_clear <= 1'b1;
+				  done <= 1'b0;
+				  erro <= 1'b0;
              end
            end
             default :
