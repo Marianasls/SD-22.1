@@ -10,7 +10,12 @@
 #define BAUD_RATE 9600
 
 struct termios options ;
-void init_wiringSerial(int fd) {
+int init_wiringSerial() {
+  if ((serial_port = serialOpen(ADDR, BAUD_RATE)) < 0) /* open serial port */
+  {
+    fprintf(stderr, "Unable to open serial device: %s\n", strerror(errno));
+    return 1;
+  }
   tcgetattr (fd, &options) ;   // Read current options
   // enable receiver, set 8 bit data, ignore control lines   
   options.c_cflag |= (CLOCAL | CREAD | CS8);    
@@ -41,12 +46,11 @@ int read_serial_int (int fd) {
 
 int main() {
   int serial_port;
-  int req, code_req=0, sensor_addr;
-  char dat;
+  int req=0;
+  int code_req, sensor_addr;
   int integral_part, decimal_part;
 
-  while(!code_req) {
-    system("cls");
+  while(!req) {
     printf("-------------------------------------\n");
     printf("-----------------MENU----------------\n");
     printf("-------------------------------------\n");
@@ -54,10 +58,7 @@ int main() {
     printf("2 - Temperatura.\n");
     printf("3 - Umidade.\n");
     scanf("%d", &req);
-    printf("Endereço do sensor: (De 0 a 31)");
-    scanf("%d", &sensor_addr);
-    
-    switch (req) {
+     switch (req) {
       case 1:
         code_req = 3;
         break;
@@ -69,48 +70,66 @@ int main() {
         break;
       default:
         printf("Inválido\n");
+        system("clear");
         break;
     }
   }
+  printf("Endereço do sensor (De 0 a 31): ");
+  scanf("%d", &sensor_addr);
 
-  if ((serial_port = serialOpen(ADDR, BAUD_RATE)) < 0) /* open serial port */
-  {
-    fprintf(stderr, "Unable to open serial device: %s\n", strerror(errno));
-    return 1;
-  }
   // controle de porta serial
-  init_wiringSerial(serial_port);
+  int serial_port = init_wiringSerial();
 
-  if (wiringPiSetup() == -1) /* initializes wiringPi setup */
+  if (wiringPiSetup() == -1) /* inicializa wiringPi setup */
   {
     fprintf(stdout, "Unable to start wiringPi: %s\n", strerror(errno));
     return 1;
   }
+
   // comando de requisição 
   fflush(stdout);
   serialPutchar(serial_port, sensor_addr);
+  fflush(stdout);
   serialPutchar(serial_port, code_req);
+  printf("requisição enviada\n");   
 
   // comando de resposta
-
-  if (serialDataAvail(serial_port)) {
-    //dat = serialGetchar (serial_port);        /* receive character serially*/
-    if (code_req != 3)   // solicita dados do sensor
-    {
-      integral_part = read_serial_int(serial_port);
-      decimal_part = read_serial_int(serial_port);
+  while(1) {
+    if (serialDataAvail(serial_port)) {
+      printf("pronto para recebimento de dados.\n");
+      if (code_req != 3)   // solicita dados do sensor
+      {
+        //integral_part = read_serial_int(serial_port);
+        //decimal_part = read_serial_int(serial_port);
+        char comando_r = serialGetchar(serial_port);
+        integral_part = serialGetchar(serial_port);
+        decimal_part = serialGetchar(serial_port);
+        printf("%c \n", comando_r);
+        if (code_req == 4) 
       if (code_req == 4) 
-        printf("Temperatura: ");
+        if (code_req == 4) 
+          printf("Temperatura: ");
+        else
       else 
-        printf("Umidade: ");
-      printf ("%d,%d\n", integral_part, decimal_part);
-    }
-    else { //solicita status do sensor
-      int status = read_serial_int(serial_port);
-      if(status == 31)
-      printf ("Status do sensor: %d\n", status);
+        else
+          printf("Umidade: ");
+        printf ("%d,%d\n", integral_part, decimal_part);
+        
+        if(integral_part) break;
+      }
+      else { //solicita status do sensor
+        //int status = read_serial_int(serial_port);
+        int status = serialGetchar(serial_port);
+        if(status == 97)
+          printf("Sensor funcionando normalmente.\n", status);
+        else if(status == 98)
+          printf("Sensor com problema.\n");
+        else printf("recebeu: %c\n", status);
+        
+        if(status) break;       
+      }
+      
     }
   }
-  
   return 0;
 }
