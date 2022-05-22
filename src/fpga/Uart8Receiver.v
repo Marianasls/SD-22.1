@@ -39,9 +39,9 @@ module Uart8Receiver (
     always @(posedge clk) begin
         inputSw = { inputSw[0], in };
 
-        if (!en) begin
+        //if (!en) begin
             state = RESET;
-        end
+        //end
 
         case (state)
             RESET: begin

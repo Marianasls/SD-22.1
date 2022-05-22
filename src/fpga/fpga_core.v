@@ -135,8 +135,10 @@ module fpga_core (
             r_tx_data     <= cs_COMMAND_ERROR;
             r_tx_start    <= 1;
 						// como o clock da uart é mais lento que a fpga
-						if(i_Tx_Busy == 1'b1)// só mudar de estado quando a uart começa a transmitir os dados
+						if(i_Tx_Busy == 1'b1) begin// só mudar de estado quando a uart começa a transmitir os dados
+							r_tx_start    <= 0;
 							r_state       <= s_CE;
+						end
 						else// assim evita de tx_start volta a 0 antes da uart perceber a mudança
 							r_state       <= s_RX_COMMAND_E;
           end // case: s_RX_COMMAND_E
