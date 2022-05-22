@@ -1,0 +1,84 @@
+|uart
+i_Clock => i_Clock.IN2
+i_Rx_Serial => i_Rx_Serial.IN1
+o_Rx_Serial << i_Rx_Serial.DB_MAX_OUTPUT_PORT_TYPE
+o_Tx_Active << uart_transmitter:UART_TX_INST.o_Tx_Active
+o_Tx_Serial << uart_transmitter:UART_TX_INST.o_Tx_Serial
+o_Tx_Done << uart_transmitter:UART_TX_INST.o_Tx_Done
+o_Rx_Byte[0] << w_Rx_Byte[0].DB_MAX_OUTPUT_PORT_TYPE
+o_Rx_Byte[1] << w_Rx_Byte[1].DB_MAX_OUTPUT_PORT_TYPE
+o_Rx_Byte[2] << w_Rx_Byte[2].DB_MAX_OUTPUT_PORT_TYPE
+o_Rx_Byte[3] << w_Rx_Byte[3].DB_MAX_OUTPUT_PORT_TYPE
+o_Rx_Byte[4] << w_Rx_Byte[4].DB_MAX_OUTPUT_PORT_TYPE
+o_Rx_Byte[5] << w_Rx_Byte[5].DB_MAX_OUTPUT_PORT_TYPE
+o_Rx_Byte[6] << w_Rx_Byte[6].DB_MAX_OUTPUT_PORT_TYPE
+o_Rx_Byte[7] << w_Rx_Byte[7].DB_MAX_OUTPUT_PORT_TYPE
+o_gnd << <GND>
+o_Rx_DV << w_Rx_Done.DB_MAX_OUTPUT_PORT_TYPE
+o_LG << <VCC>
+o_LR << <GND>
+o_Rx_Main[0] << uart_receiver:UART_RX_INST.o_SM_Main
+o_Rx_Main[1] << uart_receiver:UART_RX_INST.o_SM_Main
+o_Rx_Main[2] << uart_receiver:UART_RX_INST.o_SM_Main
+
+
+|uart|uart_receiver:UART_RX_INST
+i_Clock => r_Rx_DV.CLK
+i_Clock => r_Rx_Data.CLK
+i_Clock => r_Rx_Data_R.CLK
+i_Clock => r_SM_Main~1.DATAIN
+i_Rx_Serial => r_Rx_Data_R.DATAIN
+o_Rx_DV <= r_Rx_DV.DB_MAX_OUTPUT_PORT_TYPE
+o_Rx_Byte[0] <= <GND>
+o_Rx_Byte[1] <= <GND>
+o_Rx_Byte[2] <= <GND>
+o_Rx_Byte[3] <= <GND>
+o_Rx_Byte[4] <= <GND>
+o_Rx_Byte[5] <= <GND>
+o_Rx_Byte[6] <= <GND>
+o_Rx_Byte[7] <= <GND>
+o_SM_Main[0] <= o_SM_Main.DB_MAX_OUTPUT_PORT_TYPE
+o_SM_Main[1] <= o_SM_Main.DB_MAX_OUTPUT_PORT_TYPE
+o_SM_Main[2] <= o_SM_Main[2].DB_MAX_OUTPUT_PORT_TYPE
+
+
+|uart|uart_transmitter:UART_TX_INST
+i_Clock => r_Tx_Data[0].CLK
+i_Clock => r_Tx_Data[1].CLK
+i_Clock => r_Tx_Data[2].CLK
+i_Clock => r_Tx_Data[3].CLK
+i_Clock => r_Tx_Data[4].CLK
+i_Clock => r_Tx_Data[5].CLK
+i_Clock => r_Tx_Data[6].CLK
+i_Clock => r_Tx_Data[7].CLK
+i_Clock => r_Tx_Active.CLK
+i_Clock => r_Bit_Index[0].CLK
+i_Clock => r_Bit_Index[1].CLK
+i_Clock => r_Bit_Index[2].CLK
+i_Clock => r_Tx_Done.CLK
+i_Clock => o_Tx_Serial~reg0.CLK
+i_Clock => r_SM_Main~1.DATAIN
+i_Tx_DV => r_Tx_Active.OUTPUTSELECT
+i_Tx_DV => r_Tx_Data.OUTPUTSELECT
+i_Tx_DV => r_Tx_Data.OUTPUTSELECT
+i_Tx_DV => r_Tx_Data.OUTPUTSELECT
+i_Tx_DV => r_Tx_Data.OUTPUTSELECT
+i_Tx_DV => r_Tx_Data.OUTPUTSELECT
+i_Tx_DV => r_Tx_Data.OUTPUTSELECT
+i_Tx_DV => r_Tx_Data.OUTPUTSELECT
+i_Tx_DV => r_Tx_Data.OUTPUTSELECT
+i_Tx_DV => Selector3.IN3
+i_Tx_DV => Selector2.IN2
+i_Tx_Byte[0] => r_Tx_Data.DATAB
+i_Tx_Byte[1] => r_Tx_Data.DATAB
+i_Tx_Byte[2] => r_Tx_Data.DATAB
+i_Tx_Byte[3] => r_Tx_Data.DATAB
+i_Tx_Byte[4] => r_Tx_Data.DATAB
+i_Tx_Byte[5] => r_Tx_Data.DATAB
+i_Tx_Byte[6] => r_Tx_Data.DATAB
+i_Tx_Byte[7] => r_Tx_Data.DATAB
+o_Tx_Active <= r_Tx_Active.DB_MAX_OUTPUT_PORT_TYPE
+o_Tx_Serial <= o_Tx_Serial~reg0.DB_MAX_OUTPUT_PORT_TYPE
+o_Tx_Done <= r_Tx_Done.DB_MAX_OUTPUT_PORT_TYPE
+
+

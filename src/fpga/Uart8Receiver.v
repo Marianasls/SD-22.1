@@ -30,7 +30,7 @@ module Uart8Receiver (
     reg [7:0] receivedData = 8'b0; // temporary storage for input data
 
     initial begin
-        out <= 8'b0;
+        out <= 8'b00000000;
         err <= 1'b0;
         done <= 1'b0;
         busy <= 1'b0;

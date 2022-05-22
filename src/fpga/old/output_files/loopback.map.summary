@@ -1,0 +1,14 @@
+Analysis & Synthesis Status : Successful - Fri May 20 15:13:28 2022
+Quartus Prime Version : 20.1.1 Build 720 11/11/2020 SJ Lite Edition
+Revision Name : loopback
+Top-level Entity Name : uart
+Family : Cyclone IV E
+Total logic elements : 4
+    Total combinational functions : 3
+    Dedicated logic registers : 4
+Total registers : 4
+Total pins : 21
+Total virtual pins : 0
+Total memory bits : 0
+Embedded Multiplier 9-bit elements : 0
+Total PLLs : 0

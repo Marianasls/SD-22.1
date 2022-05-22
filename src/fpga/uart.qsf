@@ -39,7 +39,7 @@
 
 set_global_assignment -name FAMILY "Cyclone IV E"
 set_global_assignment -name DEVICE EP4CE30F23C7
-set_global_assignment -name TOP_LEVEL_ENTITY main
+set_global_assignment -name TOP_LEVEL_ENTITY fpga_core
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 21.1.0
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "18:57:31  MAY 08, 2022"
 set_global_assignment -name LAST_QUARTUS_VERSION "21.1.0 Lite Edition"
@@ -62,22 +62,6 @@ set_global_assignment -name EDA_USER_COMPILED_SIMULATION_LIBRARY_DIRECTORY "E:/i
 set_location_assignment PIN_T2 -to i_Clock
 set_location_assignment PIN_F14 -to i_Rx_Serial
 set_location_assignment PIN_F13 -to o_Tx_Serial
-set_location_assignment PIN_J7 -to o_gnd
-set_location_assignment PIN_F10 -to o_Rx_Byte[0]
-set_location_assignment PIN_C8 -to o_Rx_Byte[1]
-set_location_assignment PIN_E9 -to o_Rx_Byte[2]
-set_location_assignment PIN_G9 -to o_Rx_Byte[3]
-set_location_assignment PIN_F9 -to o_Rx_Byte[4]
-set_location_assignment PIN_F8 -to o_Rx_Byte[5]
-set_location_assignment PIN_G8 -to o_Rx_Byte[6]
-set_location_assignment PIN_H11 -to o_Rx_Byte[7]
-set_location_assignment PIN_E7 -to o_Rx_DV
-set_location_assignment PIN_D7 -to o_LG
-set_location_assignment PIN_D6 -to o_LR
-set_location_assignment PIN_J6 -to o_Rx_Serial
-set_location_assignment PIN_L8 -to o_Rx_Main[1]
-set_location_assignment PIN_J8 -to o_Rx_Main[2]
-set_location_assignment PIN_E11 -to o_Rx_Main[0]
 set_global_assignment -name VERILOG_FILE main.v
 set_global_assignment -name VERILOG_FILE Uart8Transmitter.v
 set_global_assignment -name VERILOG_FILE Uart8Receiver.v
@@ -86,6 +70,21 @@ set_global_assignment -name VERILOG_FILE fpga_core.v
 set_global_assignment -name VERILOG_FILE BaudRateGenerator.v
 set_global_assignment -name VECTOR_WAVEFORM_FILE Waveform.vwf
 set_global_assignment -name VERILOG_FILE dht11.v
+set_location_assignment PIN_C15 -to dht11
+set_location_assignment PIN_E15 -to debug_uart_signal
+set_location_assignment PIN_F10 -to debug_uart_data[0]
+set_location_assignment PIN_C8 -to debug_uart_data[1]
+set_location_assignment PIN_E9 -to debug_uart_data[2]
+set_location_assignment PIN_G9 -to debug_uart_data[3]
+set_location_assignment PIN_F9 -to debug_uart_data[4]
+set_location_assignment PIN_F8 -to debug_uart_data[5]
+set_location_assignment PIN_G8 -to debug_uart_data[6]
+set_location_assignment PIN_H11 -to debug_uart_data[7]
+set_location_assignment PIN_L8 -to debug_resetSensor
+set_location_assignment PIN_J7 -to debug_state[0]
+set_location_assignment PIN_J6 -to debug_state[1]
+set_location_assignment PIN_K8 -to debug_state[2]
+set_location_assignment PIN_J8 -to debug_state[3]
 set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
 set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
 set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top

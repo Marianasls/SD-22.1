@@ -1,0 +1,25 @@
+{
+	"partitions" : [
+		{
+			"name" : "Top",
+			"pins" : [
+				{
+					"name" : "o_Rx_Serial",
+					"strict" : false
+				},
+				{
+					"name" : "o_Rx_Main[0]",
+					"strict" : false
+				},
+				{
+					"name" : "i_Rx_Serial",
+					"strict" : false
+				},
+				{
+					"name" : "i_Clock",
+					"strict" : false
+				}
+			]
+		}
+	]
+}

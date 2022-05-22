@@ -6,10 +6,13 @@
 module main (
   // inputs
   input        i_Clock,
-  input  		rx,
-  input  		tx,
+  input  		i_Rx_Serial,
   inout			dht11,
-  //input			resetSensor,
+  output  		o_Tx_Serial,
+  output [3:0] debug_state,
+  output			debug_resetSensor,
+  output			debug_uart_signal, //para debug pode ser o rx ou tx conforme for conveniente para os testes
+  output	[7:0]	debug_uart_data,//para debug pode ser o dado recebido ou transimitido conforme for conveniente para os testes
   output 	   rxBusy, // recebendo dados
   output 	   txBusy, // transmitindo dados
   output			rxError
@@ -24,20 +27,40 @@ wire [31:0] sensorData;
 wire rxDone;
 wire txDone;
 wire txStart;
-wire sensorDone, sensorError;
+wire sensorDone, sensorError, resetSensor;
 
+//registradores para debug
+reg [7:0] d_rx_data;
+reg [7:0] d_tx_data;
+
+assign debug_resetSensor = resetSensor;
+
+assign debug_uart_signal = i_Rx_Serial;
+assign debug_uart_data = d_rx_data;
+
+always @(posedge rxDone) begin
+	d_rx_data <= uartOut;
+end
+
+//assign debug_uart_signal = o_Tx_Serial;
+//assign debug_uart_data = d_tx_data;
+
+//always @(posedge rxDone) begin
+	//d_tx_data <= uartIn;
+//end
+	
 // importações
 Uart8 uartInst (
 	 .clk(i_Clock),
     // rx interface
-    .rx(rx),
+    .rx(i_Rx_Serial),
     .rxEn(rxEn),
     .out(uartOut),
     .rxDone(rxDone),
     .rxBusy(rxBusy),
     .rxErr(rxError),
     // tx interface
-    .tx(tx),
+    .tx(o_Tx_Serial),
     .txEn(txEn),
     .txStart(txStart),
     .in(uartIn),
@@ -65,6 +88,7 @@ fpga_core controlInst (
   .o_Tx_Data(uartIn),
   .o_Tx_Start(txStart),
   .o_Dth_Start(resetSensor),
+  .debug_state(debug_state)
 );
 
 

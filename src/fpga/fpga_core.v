@@ -12,7 +12,8 @@ module fpga_core (
 
    output [7:0] o_Tx_Data,
    output       o_Tx_Start,
-   output       o_Dth_Start
+   output       o_Dth_Start,
+	output [3:0] debug_state
    );
   
   parameter ADDRESS = 0;  // endereço que identifica esta fpga
@@ -20,14 +21,19 @@ module fpga_core (
   // estados da maquina de estados
   parameter s_IDLE          = 4'b0000;
   parameter s_RX_ADDRESS    = 4'b0001;
-  parameter s_RX_ADDRESS_E  = 4'b1001;
   parameter s_RX_COMMAND    = 4'b0010;
-  parameter s_RX_COMMAND_E  = 4'b1010; // comando invalido
   parameter s_DTH_START     = 4'b0011;
   parameter s_DTH_DONE      = 4'b0100;
   parameter s_TX_COMMAND    = 4'b0101;
   parameter s_TX_INTEGRAL   = 4'b0110;
   parameter s_TX_DECIMAL    = 4'b0111;
+  parameter s_RX_ADDRESS_E  = 4'b1000;
+  parameter s_RX_COMMAND_E  = 4'b1001; // comando invalido
+  parameter s_DEFAULT		 = 4'b1111;
+  parameter s_AE		 = 4'b1011;
+  parameter s_CE		 = 4'b1100;
+  parameter s_TCE		 = 4'b1101;
+  parameter s_F		 = 4'b1110;
   
   // comandos de requisição validos
   parameter cr_DTH_STATUS = 8'h03;
@@ -36,8 +42,8 @@ module fpga_core (
 
   // comandos de resposta
   parameter cs_COMMAND_ERROR = 8'h2f;
-  parameter cs_DTH_ERROR = 8'h1f;
-  parameter cs_DTH_OKAY = 8'h00;
+  parameter cs_DTH_ERROR = 8'd98;
+  parameter cs_DTH_OKAY = 8'd102;
   parameter cs_HUMIDITY = 8'h01;
   parameter cs_TEMPERATURE = 8'h02;
 
@@ -50,8 +56,9 @@ module fpga_core (
   reg        r_tx_start = 0;
   reg        r_dth_start = 0;
   reg        r_Rx_Done = 0;
-  reg 		   r_tx_done = 0;
+  reg 		 r_tx_done = 0;
 
+  assign debug_state = r_state;
   always @(posedge i_Clock)
     begin
        
@@ -82,20 +89,22 @@ module fpga_core (
               begin
                   r_state   <= s_RX_COMMAND;
               end
+			   else
+					r_state   <= s_RX_ADDRESS;
 
             r_Rx_Done     = i_Rx_Done;
           end // case: s_RX_ADDRESS
 
         s_RX_ADDRESS_E :// endereco invalido, aguarda receber a informacao do comando que deve ser ignorada
           begin
-            r_tx_data     = 0;
-            r_tx_start    = 0;
-            r_dth_start   = 0;
-             
-				    if (r_Rx_Done == 1'b0 && i_Rx_Done == 1'b1)
-              begin
-                  r_state   <= s_IDLE;
-              end
+				r_tx_data     = 0;
+				r_tx_start    = 0;
+				r_dth_start   = 0;
+					 
+				 if (r_Rx_Done == 1'b0 && i_Rx_Done == 1'b1)
+				  begin
+						r_state   <= s_AE;
+				  end
 
             r_Rx_Done     = i_Rx_Done;
           end // case: s_RX_ADDRESS_E
@@ -117,7 +126,7 @@ module fpga_core (
           begin
             r_tx_data     <= cs_COMMAND_ERROR;
             r_tx_start    <= 1;
-            r_state       <= s_IDLE;
+            r_state       <= s_CE;
           end // case: s_RX_COMMAND_E
 		
         s_DTH_START: 
@@ -167,7 +176,7 @@ module fpga_core (
             else 
               begin
                 r_tx_data <= r_dth_status;
-                r_state <= s_IDLE;
+                r_state <= s_TCE;
               end 
               
             r_tx_start	<= 1;
@@ -193,14 +202,31 @@ module fpga_core (
             if(r_tx_done == 1'b0 && i_Tx_Done == 1'b1) begin
               r_tx_data <= r_dth_decimal;
               r_tx_start <= 1;
-              r_state <= s_IDLE;
+              r_state <= s_F;
             end
             r_tx_done <= i_Tx_Done;
           end
         // case: s_TX_DECIMAL
-			
+			s_AE:
+				begin
+					r_state <= s_IDLE;
+				end
+			s_CE:
+				begin
+					r_state <= s_IDLE;
+				end
+			s_TCE:
+				begin
+					//r_tx_start	<= 0;
+					r_state <= s_IDLE;
+				end
+			s_F:
+				begin
+					r_state <= s_IDLE;
+				end
+				
 		    default :
-          r_state <= s_IDLE;
+				r_state <= s_DEFAULT;
          
       endcase
     end

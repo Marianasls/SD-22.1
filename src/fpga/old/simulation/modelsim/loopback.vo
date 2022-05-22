@@ -1,0 +1,627 @@
+// Copyright (C) 2020  Intel Corporation. All rights reserved.
+// Your use of Intel Corporation's design tools, logic functions 
+// and other software and tools, and any partner logic 
+// functions, and any output files from any of the foregoing 
+// (including device programming or simulation files), and any 
+// associated documentation or information are expressly subject 
+// to the terms and conditions of the Intel Program License 
+// Subscription Agreement, the Intel Quartus Prime License Agreement,
+// the Intel FPGA IP License Agreement, or other applicable license
+// agreement, including, without limitation, that your use is for
+// the sole purpose of programming logic devices manufactured by
+// Intel and sold by Intel or its authorized distributors.  Please
+// refer to the applicable agreement for further details, at
+// https://fpgasoftware.intel.com/eula.
+
+// VENDOR "Altera"
+// PROGRAM "Quartus Prime"
+// VERSION "Version 20.1.1 Build 720 11/11/2020 SJ Lite Edition"
+
+// DATE "05/20/2022 15:13:37"
+
+// 
+// Device: Altera EP4CE30F23C7 Package FBGA484
+// 
+
+// 
+// This Verilog file should be used for ModelSim-Altera (Verilog) only
+// 
+
+`timescale 1 ps/ 1 ps
+
+module uart (
+	i_Clock,
+	i_Rx_Serial,
+	o_Rx_Serial,
+	o_Tx_Active,
+	o_Tx_Serial,
+	o_Tx_Done,
+	o_Rx_Byte,
+	o_gnd,
+	o_Rx_DV,
+	o_LG,
+	o_LR,
+	o_Rx_Main);
+input 	i_Clock;
+input 	i_Rx_Serial;
+output 	o_Rx_Serial;
+output 	o_Tx_Active;
+output 	o_Tx_Serial;
+output 	o_Tx_Done;
+output 	[7:0] o_Rx_Byte;
+output 	o_gnd;
+output 	o_Rx_DV;
+output 	o_LG;
+output 	o_LR;
+output 	[2:0] o_Rx_Main;
+
+// Design Ports Information
+// o_Rx_Serial	=>  Location: PIN_F15,	 I/O Standard: 2.5 V,	 Current Strength: Default
+// o_Tx_Active	=>  Location: PIN_AB16,	 I/O Standard: 2.5 V,	 Current Strength: Default
+// o_Tx_Serial	=>  Location: PIN_F13,	 I/O Standard: 2.5 V,	 Current Strength: Default
+// o_Tx_Done	=>  Location: PIN_N1,	 I/O Standard: 2.5 V,	 Current Strength: Default
+// o_Rx_Byte[0]	=>  Location: PIN_R18,	 I/O Standard: 2.5 V,	 Current Strength: Default
+// o_Rx_Byte[1]	=>  Location: PIN_V13,	 I/O Standard: 2.5 V,	 Current Strength: Default
+// o_Rx_Byte[2]	=>  Location: PIN_T14,	 I/O Standard: 2.5 V,	 Current Strength: Default
+// o_Rx_Byte[3]	=>  Location: PIN_L6,	 I/O Standard: 2.5 V,	 Current Strength: Default
+// o_Rx_Byte[4]	=>  Location: PIN_F11,	 I/O Standard: 2.5 V,	 Current Strength: Default
+// o_Rx_Byte[5]	=>  Location: PIN_B7,	 I/O Standard: 2.5 V,	 Current Strength: Default
+// o_Rx_Byte[6]	=>  Location: PIN_D19,	 I/O Standard: 2.5 V,	 Current Strength: Default
+// o_Rx_Byte[7]	=>  Location: PIN_Y10,	 I/O Standard: 2.5 V,	 Current Strength: Default
+// o_gnd	=>  Location: PIN_D7,	 I/O Standard: 2.5 V,	 Current Strength: Default
+// o_Rx_DV	=>  Location: PIN_P3,	 I/O Standard: 2.5 V,	 Current Strength: Default
+// o_LG	=>  Location: PIN_J4,	 I/O Standard: 2.5 V,	 Current Strength: Default
+// o_LR	=>  Location: PIN_G18,	 I/O Standard: 2.5 V,	 Current Strength: Default
+// o_Rx_Main[0]	=>  Location: PIN_D20,	 I/O Standard: 2.5 V,	 Current Strength: Default
+// o_Rx_Main[1]	=>  Location: PIN_C22,	 I/O Standard: 2.5 V,	 Current Strength: Default
+// o_Rx_Main[2]	=>  Location: PIN_W8,	 I/O Standard: 2.5 V,	 Current Strength: Default
+// i_Rx_Serial	=>  Location: PIN_F14,	 I/O Standard: 2.5 V,	 Current Strength: Default
+// i_Clock	=>  Location: PIN_T2,	 I/O Standard: 2.5 V,	 Current Strength: Default
+
+
+wire gnd;
+wire vcc;
+wire unknown;
+
+assign gnd = 1'b0;
+assign vcc = 1'b1;
+assign unknown = 1'bx;
+
+tri1 devclrn;
+tri1 devpor;
+tri1 devoe;
+wire \o_Rx_Serial~output_o ;
+wire \o_Tx_Active~output_o ;
+wire \o_Tx_Serial~output_o ;
+wire \o_Tx_Done~output_o ;
+wire \o_Rx_Byte[0]~output_o ;
+wire \o_Rx_Byte[1]~output_o ;
+wire \o_Rx_Byte[2]~output_o ;
+wire \o_Rx_Byte[3]~output_o ;
+wire \o_Rx_Byte[4]~output_o ;
+wire \o_Rx_Byte[5]~output_o ;
+wire \o_Rx_Byte[6]~output_o ;
+wire \o_Rx_Byte[7]~output_o ;
+wire \o_gnd~output_o ;
+wire \o_Rx_DV~output_o ;
+wire \o_LG~output_o ;
+wire \o_LR~output_o ;
+wire \o_Rx_Main[0]~output_o ;
+wire \o_Rx_Main[1]~output_o ;
+wire \o_Rx_Main[2]~output_o ;
+wire \i_Rx_Serial~input_o ;
+wire \i_Clock~input_o ;
+wire \i_Clock~inputclkctrl_outclk ;
+wire \UART_RX_INST|r_Rx_Data_R~0_combout ;
+wire \UART_RX_INST|r_Rx_Data_R~q ;
+wire \UART_RX_INST|r_Rx_Data~feeder_combout ;
+wire \UART_RX_INST|r_Rx_Data~q ;
+wire \UART_RX_INST|r_SM_Main.000~0_combout ;
+wire \UART_RX_INST|r_SM_Main.000~q ;
+wire \UART_RX_INST|r_SM_Main.s_RX_START_BIT~0_combout ;
+wire \UART_RX_INST|r_SM_Main.s_RX_START_BIT~q ;
+
+
+hard_block auto_generated_inst(
+	.devpor(devpor),
+	.devclrn(devclrn),
+	.devoe(devoe));
+
+// Location: IOOBUF_X63_Y43_N2
+cycloneive_io_obuf \o_Rx_Serial~output (
+	.i(\i_Rx_Serial~input_o ),
+	.oe(vcc),
+	.seriesterminationcontrol(16'b0000000000000000),
+	.devoe(devoe),
+	.o(\o_Rx_Serial~output_o ),
+	.obar());
+// synopsys translate_off
+defparam \o_Rx_Serial~output .bus_hold = "false";
+defparam \o_Rx_Serial~output .open_drain_output = "false";
+// synopsys translate_on
+
+// Location: IOOBUF_X45_Y0_N16
+cycloneive_io_obuf \o_Tx_Active~output (
+	.i(gnd),
+	.oe(vcc),
+	.seriesterminationcontrol(16'b0000000000000000),
+	.devoe(devoe),
+	.o(\o_Tx_Active~output_o ),
+	.obar());
+// synopsys translate_off
+defparam \o_Tx_Active~output .bus_hold = "false";
+defparam \o_Tx_Active~output .open_drain_output = "false";
+// synopsys translate_on
+
+// Location: IOOBUF_X45_Y43_N2
+cycloneive_io_obuf \o_Tx_Serial~output (
+	.i(vcc),
+	.oe(vcc),
+	.seriesterminationcontrol(16'b0000000000000000),
+	.devoe(devoe),
+	.o(\o_Tx_Serial~output_o ),
+	.obar());
+// synopsys translate_off
+defparam \o_Tx_Serial~output .bus_hold = "false";
+defparam \o_Tx_Serial~output .open_drain_output = "false";
+// synopsys translate_on
+
+// Location: IOOBUF_X0_Y19_N23
+cycloneive_io_obuf \o_Tx_Done~output (
+	.i(gnd),
+	.oe(vcc),
+	.seriesterminationcontrol(16'b0000000000000000),
+	.devoe(devoe),
+	.o(\o_Tx_Done~output_o ),
+	.obar());
+// synopsys translate_off
+defparam \o_Tx_Done~output .bus_hold = "false";
+defparam \o_Tx_Done~output .open_drain_output = "false";
+// synopsys translate_on
+
+// Location: IOOBUF_X67_Y12_N23
+cycloneive_io_obuf \o_Rx_Byte[0]~output (
+	.i(gnd),
+	.oe(vcc),
+	.seriesterminationcontrol(16'b0000000000000000),
+	.devoe(devoe),
+	.o(\o_Rx_Byte[0]~output_o ),
+	.obar());
+// synopsys translate_off
+defparam \o_Rx_Byte[0]~output .bus_hold = "false";
+defparam \o_Rx_Byte[0]~output .open_drain_output = "false";
+// synopsys translate_on
+
+// Location: IOOBUF_X48_Y0_N30
+cycloneive_io_obuf \o_Rx_Byte[1]~output (
+	.i(gnd),
+	.oe(vcc),
+	.seriesterminationcontrol(16'b0000000000000000),
+	.devoe(devoe),
+	.o(\o_Rx_Byte[1]~output_o ),
+	.obar());
+// synopsys translate_off
+defparam \o_Rx_Byte[1]~output .bus_hold = "false";
+defparam \o_Rx_Byte[1]~output .open_drain_output = "false";
+// synopsys translate_on
+
+// Location: IOOBUF_X52_Y0_N16
+cycloneive_io_obuf \o_Rx_Byte[2]~output (
+	.i(gnd),
+	.oe(vcc),
+	.seriesterminationcontrol(16'b0000000000000000),
+	.devoe(devoe),
+	.o(\o_Rx_Byte[2]~output_o ),
+	.obar());
+// synopsys translate_off
+defparam \o_Rx_Byte[2]~output .bus_hold = "false";
+defparam \o_Rx_Byte[2]~output .open_drain_output = "false";
+// synopsys translate_on
+
+// Location: IOOBUF_X0_Y20_N2
+cycloneive_io_obuf \o_Rx_Byte[3]~output (
+	.i(gnd),
+	.oe(vcc),
+	.seriesterminationcontrol(16'b0000000000000000),
+	.devoe(devoe),
+	.o(\o_Rx_Byte[3]~output_o ),
+	.obar());
+// synopsys translate_off
+defparam \o_Rx_Byte[3]~output .bus_hold = "false";
+defparam \o_Rx_Byte[3]~output .open_drain_output = "false";
+// synopsys translate_on
+
+// Location: IOOBUF_X36_Y43_N23
+cycloneive_io_obuf \o_Rx_Byte[4]~output (
+	.i(gnd),
+	.oe(vcc),
+	.seriesterminationcontrol(16'b0000000000000000),
+	.devoe(devoe),
+	.o(\o_Rx_Byte[4]~output_o ),
+	.obar());
+// synopsys translate_off
+defparam \o_Rx_Byte[4]~output .bus_hold = "false";
+defparam \o_Rx_Byte[4]~output .open_drain_output = "false";
+// synopsys translate_on
+
+// Location: IOOBUF_X25_Y43_N23
+cycloneive_io_obuf \o_Rx_Byte[5]~output (
+	.i(gnd),
+	.oe(vcc),
+	.seriesterminationcontrol(16'b0000000000000000),
+	.devoe(devoe),
+	.o(\o_Rx_Byte[5]~output_o ),
+	.obar());
+// synopsys translate_off
+defparam \o_Rx_Byte[5]~output .bus_hold = "false";
+defparam \o_Rx_Byte[5]~output .open_drain_output = "false";
+// synopsys translate_on
+
+// Location: IOOBUF_X59_Y43_N2
+cycloneive_io_obuf \o_Rx_Byte[6]~output (
+	.i(gnd),
+	.oe(vcc),
+	.seriesterminationcontrol(16'b0000000000000000),
+	.devoe(devoe),
+	.o(\o_Rx_Byte[6]~output_o ),
+	.obar());
+// synopsys translate_off
+defparam \o_Rx_Byte[6]~output .bus_hold = "false";
+defparam \o_Rx_Byte[6]~output .open_drain_output = "false";
+// synopsys translate_on
+
+// Location: IOOBUF_X34_Y0_N16
+cycloneive_io_obuf \o_Rx_Byte[7]~output (
+	.i(gnd),
+	.oe(vcc),
+	.seriesterminationcontrol(16'b0000000000000000),
+	.devoe(devoe),
+	.o(\o_Rx_Byte[7]~output_o ),
+	.obar());
+// synopsys translate_off
+defparam \o_Rx_Byte[7]~output .bus_hold = "false";
+defparam \o_Rx_Byte[7]~output .open_drain_output = "false";
+// synopsys translate_on
+
+// Location: IOOBUF_X9_Y43_N16
+cycloneive_io_obuf \o_gnd~output (
+	.i(gnd),
+	.oe(vcc),
+	.seriesterminationcontrol(16'b0000000000000000),
+	.devoe(devoe),
+	.o(\o_gnd~output_o ),
+	.obar());
+// synopsys translate_off
+defparam \o_gnd~output .bus_hold = "false";
+defparam \o_gnd~output .open_drain_output = "false";
+// synopsys translate_on
+
+// Location: IOOBUF_X0_Y15_N2
+cycloneive_io_obuf \o_Rx_DV~output (
+	.i(gnd),
+	.oe(vcc),
+	.seriesterminationcontrol(16'b0000000000000000),
+	.devoe(devoe),
+	.o(\o_Rx_DV~output_o ),
+	.obar());
+// synopsys translate_off
+defparam \o_Rx_DV~output .bus_hold = "false";
+defparam \o_Rx_DV~output .open_drain_output = "false";
+// synopsys translate_on
+
+// Location: IOOBUF_X0_Y29_N16
+cycloneive_io_obuf \o_LG~output (
+	.i(vcc),
+	.oe(vcc),
+	.seriesterminationcontrol(16'b0000000000000000),
+	.devoe(devoe),
+	.o(\o_LG~output_o ),
+	.obar());
+// synopsys translate_off
+defparam \o_LG~output .bus_hold = "false";
+defparam \o_LG~output .open_drain_output = "false";
+// synopsys translate_on
+
+// Location: IOOBUF_X67_Y37_N2
+cycloneive_io_obuf \o_LR~output (
+	.i(gnd),
+	.oe(vcc),
+	.seriesterminationcontrol(16'b0000000000000000),
+	.devoe(devoe),
+	.o(\o_LR~output_o ),
+	.obar());
+// synopsys translate_off
+defparam \o_LR~output .bus_hold = "false";
+defparam \o_LR~output .open_drain_output = "false";
+// synopsys translate_on
+
+// Location: IOOBUF_X67_Y40_N23
+cycloneive_io_obuf \o_Rx_Main[0]~output (
+	.i(\UART_RX_INST|r_SM_Main.s_RX_START_BIT~q ),
+	.oe(vcc),
+	.seriesterminationcontrol(16'b0000000000000000),
+	.devoe(devoe),
+	.o(\o_Rx_Main[0]~output_o ),
+	.obar());
+// synopsys translate_off
+defparam \o_Rx_Main[0]~output .bus_hold = "false";
+defparam \o_Rx_Main[0]~output .open_drain_output = "false";
+// synopsys translate_on
+
+// Location: IOOBUF_X67_Y38_N16
+cycloneive_io_obuf \o_Rx_Main[1]~output (
+	.i(gnd),
+	.oe(vcc),
+	.seriesterminationcontrol(16'b0000000000000000),
+	.devoe(devoe),
+	.o(\o_Rx_Main[1]~output_o ),
+	.obar());
+// synopsys translate_off
+defparam \o_Rx_Main[1]~output .bus_hold = "false";
+defparam \o_Rx_Main[1]~output .open_drain_output = "false";
+// synopsys translate_on
+
+// Location: IOOBUF_X16_Y0_N9
+cycloneive_io_obuf \o_Rx_Main[2]~output (
+	.i(gnd),
+	.oe(vcc),
+	.seriesterminationcontrol(16'b0000000000000000),
+	.devoe(devoe),
+	.o(\o_Rx_Main[2]~output_o ),
+	.obar());
+// synopsys translate_off
+defparam \o_Rx_Main[2]~output .bus_hold = "false";
+defparam \o_Rx_Main[2]~output .open_drain_output = "false";
+// synopsys translate_on
+
+// Location: IOIBUF_X63_Y43_N29
+cycloneive_io_ibuf \i_Rx_Serial~input (
+	.i(i_Rx_Serial),
+	.ibar(gnd),
+	.o(\i_Rx_Serial~input_o ));
+// synopsys translate_off
+defparam \i_Rx_Serial~input .bus_hold = "false";
+defparam \i_Rx_Serial~input .simulate_z_as = "z";
+// synopsys translate_on
+
+// Location: IOIBUF_X0_Y21_N15
+cycloneive_io_ibuf \i_Clock~input (
+	.i(i_Clock),
+	.ibar(gnd),
+	.o(\i_Clock~input_o ));
+// synopsys translate_off
+defparam \i_Clock~input .bus_hold = "false";
+defparam \i_Clock~input .simulate_z_as = "z";
+// synopsys translate_on
+
+// Location: CLKCTRL_G4
+cycloneive_clkctrl \i_Clock~inputclkctrl (
+	.ena(vcc),
+	.inclk({vcc,vcc,vcc,\i_Clock~input_o }),
+	.clkselect(2'b00),
+	.devclrn(devclrn),
+	.devpor(devpor),
+	.outclk(\i_Clock~inputclkctrl_outclk ));
+// synopsys translate_off
+defparam \i_Clock~inputclkctrl .clock_type = "global clock";
+defparam \i_Clock~inputclkctrl .ena_register_mode = "none";
+// synopsys translate_on
+
+// Location: LCCOMB_X64_Y40_N10
+cycloneive_lcell_comb \UART_RX_INST|r_Rx_Data_R~0 (
+// Equation(s):
+// \UART_RX_INST|r_Rx_Data_R~0_combout  = !\i_Rx_Serial~input_o 
+
+	.dataa(gnd),
+	.datab(gnd),
+	.datac(gnd),
+	.datad(\i_Rx_Serial~input_o ),
+	.cin(gnd),
+	.combout(\UART_RX_INST|r_Rx_Data_R~0_combout ),
+	.cout());
+// synopsys translate_off
+defparam \UART_RX_INST|r_Rx_Data_R~0 .lut_mask = 16'h00FF;
+defparam \UART_RX_INST|r_Rx_Data_R~0 .sum_lutc_input = "datac";
+// synopsys translate_on
+
+// Location: FF_X64_Y40_N11
+dffeas \UART_RX_INST|r_Rx_Data_R (
+	.clk(\i_Clock~inputclkctrl_outclk ),
+	.d(\UART_RX_INST|r_Rx_Data_R~0_combout ),
+	.asdata(vcc),
+	.clrn(vcc),
+	.aload(gnd),
+	.sclr(gnd),
+	.sload(gnd),
+	.ena(vcc),
+	.devclrn(devclrn),
+	.devpor(devpor),
+	.q(\UART_RX_INST|r_Rx_Data_R~q ),
+	.prn(vcc));
+// synopsys translate_off
+defparam \UART_RX_INST|r_Rx_Data_R .is_wysiwyg = "true";
+defparam \UART_RX_INST|r_Rx_Data_R .power_up = "low";
+// synopsys translate_on
+
+// Location: LCCOMB_X64_Y40_N18
+cycloneive_lcell_comb \UART_RX_INST|r_Rx_Data~feeder (
+// Equation(s):
+// \UART_RX_INST|r_Rx_Data~feeder_combout  = \UART_RX_INST|r_Rx_Data_R~q 
+
+	.dataa(gnd),
+	.datab(gnd),
+	.datac(gnd),
+	.datad(\UART_RX_INST|r_Rx_Data_R~q ),
+	.cin(gnd),
+	.combout(\UART_RX_INST|r_Rx_Data~feeder_combout ),
+	.cout());
+// synopsys translate_off
+defparam \UART_RX_INST|r_Rx_Data~feeder .lut_mask = 16'hFF00;
+defparam \UART_RX_INST|r_Rx_Data~feeder .sum_lutc_input = "datac";
+// synopsys translate_on
+
+// Location: FF_X64_Y40_N19
+dffeas \UART_RX_INST|r_Rx_Data (
+	.clk(\i_Clock~inputclkctrl_outclk ),
+	.d(\UART_RX_INST|r_Rx_Data~feeder_combout ),
+	.asdata(vcc),
+	.clrn(vcc),
+	.aload(gnd),
+	.sclr(gnd),
+	.sload(gnd),
+	.ena(vcc),
+	.devclrn(devclrn),
+	.devpor(devpor),
+	.q(\UART_RX_INST|r_Rx_Data~q ),
+	.prn(vcc));
+// synopsys translate_off
+defparam \UART_RX_INST|r_Rx_Data .is_wysiwyg = "true";
+defparam \UART_RX_INST|r_Rx_Data .power_up = "low";
+// synopsys translate_on
+
+// Location: LCCOMB_X64_Y40_N12
+cycloneive_lcell_comb \UART_RX_INST|r_SM_Main.000~0 (
+// Equation(s):
+// \UART_RX_INST|r_SM_Main.000~0_combout  = (\UART_RX_INST|r_SM_Main.000~q ) # (\UART_RX_INST|r_Rx_Data~q )
+
+	.dataa(gnd),
+	.datab(gnd),
+	.datac(\UART_RX_INST|r_SM_Main.000~q ),
+	.datad(\UART_RX_INST|r_Rx_Data~q ),
+	.cin(gnd),
+	.combout(\UART_RX_INST|r_SM_Main.000~0_combout ),
+	.cout());
+// synopsys translate_off
+defparam \UART_RX_INST|r_SM_Main.000~0 .lut_mask = 16'hFFF0;
+defparam \UART_RX_INST|r_SM_Main.000~0 .sum_lutc_input = "datac";
+// synopsys translate_on
+
+// Location: FF_X64_Y40_N13
+dffeas \UART_RX_INST|r_SM_Main.000 (
+	.clk(\i_Clock~inputclkctrl_outclk ),
+	.d(\UART_RX_INST|r_SM_Main.000~0_combout ),
+	.asdata(vcc),
+	.clrn(vcc),
+	.aload(gnd),
+	.sclr(gnd),
+	.sload(gnd),
+	.ena(vcc),
+	.devclrn(devclrn),
+	.devpor(devpor),
+	.q(\UART_RX_INST|r_SM_Main.000~q ),
+	.prn(vcc));
+// synopsys translate_off
+defparam \UART_RX_INST|r_SM_Main.000 .is_wysiwyg = "true";
+defparam \UART_RX_INST|r_SM_Main.000 .power_up = "low";
+// synopsys translate_on
+
+// Location: LCCOMB_X64_Y40_N24
+cycloneive_lcell_comb \UART_RX_INST|r_SM_Main.s_RX_START_BIT~0 (
+// Equation(s):
+// \UART_RX_INST|r_SM_Main.s_RX_START_BIT~0_combout  = (\UART_RX_INST|r_SM_Main.s_RX_START_BIT~q ) # ((\UART_RX_INST|r_Rx_Data~q  & !\UART_RX_INST|r_SM_Main.000~q ))
+
+	.dataa(gnd),
+	.datab(\UART_RX_INST|r_Rx_Data~q ),
+	.datac(\UART_RX_INST|r_SM_Main.s_RX_START_BIT~q ),
+	.datad(\UART_RX_INST|r_SM_Main.000~q ),
+	.cin(gnd),
+	.combout(\UART_RX_INST|r_SM_Main.s_RX_START_BIT~0_combout ),
+	.cout());
+// synopsys translate_off
+defparam \UART_RX_INST|r_SM_Main.s_RX_START_BIT~0 .lut_mask = 16'hF0FC;
+defparam \UART_RX_INST|r_SM_Main.s_RX_START_BIT~0 .sum_lutc_input = "datac";
+// synopsys translate_on
+
+// Location: FF_X64_Y40_N25
+dffeas \UART_RX_INST|r_SM_Main.s_RX_START_BIT (
+	.clk(\i_Clock~inputclkctrl_outclk ),
+	.d(\UART_RX_INST|r_SM_Main.s_RX_START_BIT~0_combout ),
+	.asdata(vcc),
+	.clrn(vcc),
+	.aload(gnd),
+	.sclr(gnd),
+	.sload(gnd),
+	.ena(vcc),
+	.devclrn(devclrn),
+	.devpor(devpor),
+	.q(\UART_RX_INST|r_SM_Main.s_RX_START_BIT~q ),
+	.prn(vcc));
+// synopsys translate_off
+defparam \UART_RX_INST|r_SM_Main.s_RX_START_BIT .is_wysiwyg = "true";
+defparam \UART_RX_INST|r_SM_Main.s_RX_START_BIT .power_up = "low";
+// synopsys translate_on
+
+assign o_Rx_Serial = \o_Rx_Serial~output_o ;
+
+assign o_Tx_Active = \o_Tx_Active~output_o ;
+
+assign o_Tx_Serial = \o_Tx_Serial~output_o ;
+
+assign o_Tx_Done = \o_Tx_Done~output_o ;
+
+assign o_Rx_Byte[0] = \o_Rx_Byte[0]~output_o ;
+
+assign o_Rx_Byte[1] = \o_Rx_Byte[1]~output_o ;
+
+assign o_Rx_Byte[2] = \o_Rx_Byte[2]~output_o ;
+
+assign o_Rx_Byte[3] = \o_Rx_Byte[3]~output_o ;
+
+assign o_Rx_Byte[4] = \o_Rx_Byte[4]~output_o ;
+
+assign o_Rx_Byte[5] = \o_Rx_Byte[5]~output_o ;
+
+assign o_Rx_Byte[6] = \o_Rx_Byte[6]~output_o ;
+
+assign o_Rx_Byte[7] = \o_Rx_Byte[7]~output_o ;
+
+assign o_gnd = \o_gnd~output_o ;
+
+assign o_Rx_DV = \o_Rx_DV~output_o ;
+
+assign o_LG = \o_LG~output_o ;
+
+assign o_LR = \o_LR~output_o ;
+
+assign o_Rx_Main[0] = \o_Rx_Main[0]~output_o ;
+
+assign o_Rx_Main[1] = \o_Rx_Main[1]~output_o ;
+
+assign o_Rx_Main[2] = \o_Rx_Main[2]~output_o ;
+
+endmodule
+
+module hard_block (
+
+	devpor,
+	devclrn,
+	devoe);
+
+// Design Ports Information
+// ~ALTERA_ASDO_DATA1~	=>  Location: PIN_D1,	 I/O Standard: 2.5 V,	 Current Strength: Default
+// ~ALTERA_FLASH_nCE_nCSO~	=>  Location: PIN_E2,	 I/O Standard: 2.5 V,	 Current Strength: Default
+// ~ALTERA_DCLK~	=>  Location: PIN_K2,	 I/O Standard: 2.5 V,	 Current Strength: Default
+// ~ALTERA_DATA0~	=>  Location: PIN_K1,	 I/O Standard: 2.5 V,	 Current Strength: Default
+// ~ALTERA_nCEO~	=>  Location: PIN_K22,	 I/O Standard: 2.5 V,	 Current Strength: 8mA
+
+input 	devpor;
+input 	devclrn;
+input 	devoe;
+
+wire gnd;
+wire vcc;
+wire unknown;
+
+assign gnd = 1'b0;
+assign vcc = 1'b1;
+assign unknown = 1'bx;
+
+wire \~ALTERA_ASDO_DATA1~~padout ;
+wire \~ALTERA_FLASH_nCE_nCSO~~padout ;
+wire \~ALTERA_DATA0~~padout ;
+wire \~ALTERA_ASDO_DATA1~~ibuf_o ;
+wire \~ALTERA_FLASH_nCE_nCSO~~ibuf_o ;
+wire \~ALTERA_DATA0~~ibuf_o ;
+
+
+endmodule
