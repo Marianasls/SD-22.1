@@ -101,9 +101,9 @@ module Uart8Receiver (
             STOP_BIT: begin
                 if (&clockCount || (clockCount >= 4'h8 && !(|inputSw))) begin
                     state <= IDLE;
-                    out <= receivedData;
                     done <= 1'b1;
                     busy <= 1'b0;
+                    out <= receivedData;
                     clockCount <= 4'b0;
                 end else begin
                     clockCount <= clockCount + 1;
