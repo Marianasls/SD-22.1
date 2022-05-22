@@ -2,18 +2,21 @@
 // e segue o protocolo de comunicação definido.
   
 module fpga_core (
-   input        i_Clock,
-   input [7:0]  i_Rx_Data,// dados recebidos pela uart
-   input        i_Rx_Done, // recebimento de dados da uart concluido
-   input [31:0] i_Dth_Data,// dados recebidos pela dth11
-   input        i_Dth_Done,// recebimento de dados do dth11 concluido
-   input        i_Dth_Error,// erro no sensor dth11
-   input        i_Tx_Done,// transmissao de dados da uart concluida
+		input        i_Clock,
+		input [7:0]  i_Rx_Data,// dados recebidos pela uart
+		input        i_Rx_Done, // recebimento de dados da uart concluido
+		input        i_Tx_Busy, // A uart começou a transmitir dados
+		input [31:0] i_Dth_Data,// dados recebidos pela dth11
+		input        i_Dth_Done,// recebimento de dados do dth11 concluido
+		input        i_Dth_Error,// erro no sensor dth11
+		input        i_Tx_Done,// transmissao de dados da uart concluida
+		input				 i_single_req,//para realizar apenas uma requisição, ou seja não voltar ao estado inicial
 
-   output [7:0] o_Tx_Data,
-   output       o_Tx_Start,
-   output       o_Dth_Start,
-	output [3:0] debug_state
+		output [7:0] o_Tx_Data,
+		output       o_Tx_Start,
+		output       o_Dth_Start,
+		output [3:0] debug_state,
+		output [7:0] debug_rx_Data
    );
   
   parameter ADDRESS = 0;  // endereço que identifica esta fpga
@@ -30,10 +33,10 @@ module fpga_core (
   parameter s_RX_ADDRESS_E  = 4'b1000;
   parameter s_RX_COMMAND_E  = 4'b1001; // comando invalido
   parameter s_DEFAULT		 = 4'b1111;
-  parameter s_AE		 = 4'b1011;
-  parameter s_CE		 = 4'b1100;
-  parameter s_TCE		 = 4'b1101;
-  parameter s_F		 = 4'b1110;
+  parameter s_AE		 = 4'b1011;//erro de endereço
+  parameter s_CE		 = 4'b1100;// erro de comando
+  parameter s_TS		 = 4'b1101;// transmitiu status
+  parameter s_F		 = 4'b1110;// estado final
   
   // comandos de requisição validos
   parameter cr_DTH_STATUS = 8'h03;
@@ -42,37 +45,41 @@ module fpga_core (
 
   // comandos de resposta
   parameter cs_COMMAND_ERROR = 8'h2f;
-  parameter cs_DTH_ERROR = 8'd98;
-  parameter cs_DTH_OKAY = 8'd102;
+  parameter cs_DTH_ERROR = 8'h1F;
+  parameter cs_DTH_OKAY = 8'h00;
   parameter cs_HUMIDITY = 8'h01;
   parameter cs_TEMPERATURE = 8'h02;
 
-  reg [3:0]  r_state = s_IDLE;
-  reg [7:0]  r_CR = 0;// comando recebido
-  reg [7:0]  r_dth_integral = 0;
-  reg [7:0]  r_dth_decimal = 0;
-  reg [7:0]  r_dth_status = 0;
-  reg [7:0]  r_tx_data = 0;
-  reg        r_tx_start = 0;
-  reg        r_dth_start = 0;
-  reg        r_Rx_Done = 0;
-  reg 		 r_tx_done = 0;
+	reg [3:0]  r_state = s_IDLE;
+	reg [7:0]  r_CR = 0;// comando recebido
+	reg [7:0]  r_dth_integral = 0;
+	reg [7:0]  r_dth_decimal = 0;
+	reg [7:0]  r_dth_status = 0;
+	reg [7:0]  r_tx_data = 0;
+	reg [7:0]  r_rx_data = 0;
+	reg        r_tx_start = 0;
+	reg        r_dth_start = 0;
+	reg        r_Rx_Done = 0;
+	reg				 r_tx_done = 0;
 
   assign debug_state = r_state;
+  assign debug_rx_Data = r_rx_data;
+  
   always @(posedge i_Clock)
     begin
-       
       case (r_state)
         s_IDLE :
           begin
             r_tx_data     = 0;
             r_tx_start    = 0;
             r_dth_start   = 0;
+						r_rx_data 		<= 8'd0;
             r_Rx_Done     = i_Rx_Done;
 
             if (i_Rx_Done == 1'b1)
               begin
-                if(i_Rx_Data == ADDRESS)
+								r_rx_data <= i_Rx_Data;
+                if(r_rx_data == ADDRESS)
                   r_state   <= s_RX_ADDRESS;
                 else
                   r_state   <= s_RX_ADDRESS_E;
@@ -84,9 +91,10 @@ module fpga_core (
             r_tx_data     = 0;
             r_tx_start    = 0;
             r_dth_start   = 0;
-             
+				
             if (r_Rx_Done == 1'b0 && i_Rx_Done == 1'b1)
               begin
+									r_rx_data <= i_Rx_Data;
                   r_state   <= s_RX_COMMAND;
               end
 			   else
@@ -97,23 +105,23 @@ module fpga_core (
 
         s_RX_ADDRESS_E :// endereco invalido, aguarda receber a informacao do comando que deve ser ignorada
           begin
-				r_tx_data     = 0;
-				r_tx_start    = 0;
-				r_dth_start   = 0;
-					 
-				 if (r_Rx_Done == 1'b0 && i_Rx_Done == 1'b1)
-				  begin
-						r_state   <= s_AE;
-				  end
+						r_tx_data     = 0;
+						r_tx_start    = 0;
+						r_dth_start   = 0;
+							 
+						if (r_Rx_Done == 1'b0 && i_Rx_Done == 1'b1) begin
+							r_rx_data <= i_Rx_Data;
+							r_state   <= s_AE;
+						end
 
-            r_Rx_Done     = i_Rx_Done;
-          end // case: s_RX_ADDRESS_E
+						r_Rx_Done     = i_Rx_Done;
+					end // case: s_RX_ADDRESS_E
         
         s_RX_COMMAND :
           begin
-            if (i_Rx_Data == cr_DTH_STATUS || i_Rx_Data == cr_TEMPERATURE || i_Rx_Data == cr_HUMIDITY)
+            if (r_rx_data == cr_DTH_STATUS || r_rx_data == cr_TEMPERATURE || r_rx_data == cr_HUMIDITY)
               begin
-                r_CR      = i_Rx_Data; // armazena o comando recebido, para ser usado posteriormente
+                r_CR      = r_rx_data; // armazena o comando recebido, para ser usado posteriormente
                 r_state   = s_DTH_START;
               end
             else
@@ -126,7 +134,11 @@ module fpga_core (
           begin
             r_tx_data     <= cs_COMMAND_ERROR;
             r_tx_start    <= 1;
-            r_state       <= s_CE;
+						// como o clock da uart é mais lento que a fpga
+						if(i_Tx_Busy == 1'b1)// só mudar de estado quando a uart começa a transmitir os dados
+							r_state       <= s_CE;
+						else// assim evita de tx_start volta a 0 antes da uart perceber a mudança
+							r_state       <= s_RX_COMMAND_E;
           end // case: s_RX_COMMAND_E
 		
         s_DTH_START: 
@@ -176,16 +188,21 @@ module fpga_core (
             else 
               begin
                 r_tx_data <= r_dth_status;
-                r_state <= s_TCE;
+                r_state <= s_TS;
               end 
-              
+						
             r_tx_start	<= 1;
           end
         // case: s_TX_COMMAND
         
         s_TX_INTEGRAL:
           begin
-            r_tx_start <= 0;
+						// como o clock da uart é mais lento que a fpga
+						if(i_Tx_Busy == 1'b1)// só mudar o sinal de start quando a uart começa a transmitir os dados
+							r_tx_start	<= 0;
+						else// assim evita de tx_start volta a 0 antes da uart perceber a mudança
+							r_tx_start	<= 1;
+							
             if(i_Tx_Done == 1'b1) begin
               r_tx_data <= r_dth_integral;
               r_tx_start <= 1;
@@ -198,7 +215,12 @@ module fpga_core (
         
         s_TX_DECIMAL:
           begin
-            r_tx_start	<= 0;
+						// como o clock da uart é mais lento que a fpga
+						if(i_Tx_Busy == 1'b1)// só mudar o sinal de start quando a uart começa a transmitir os dados
+							r_tx_start	<= 0;
+						else// assim evita de tx_start volta a 0 antes da uart perceber a mudança
+							r_tx_start	<= 1;
+							
             if(r_tx_done == 1'b0 && i_Tx_Done == 1'b1) begin
               r_tx_data <= r_dth_decimal;
               r_tx_start <= 1;
@@ -209,24 +231,41 @@ module fpga_core (
         // case: s_TX_DECIMAL
 			s_AE:
 				begin
-					r_state <= s_IDLE;
+					if(i_single_req == 1'b1)
+						r_state <= s_AE;
+					else
+						r_state <= s_IDLE;
 				end
 			s_CE:
 				begin
-					r_state <= s_IDLE;
+					if(i_single_req == 1'b1)
+						r_state <= s_CE;
+					else
+						r_state <= s_IDLE;
 				end
-			s_TCE:
+			s_TS:
 				begin
-					//r_tx_start	<= 0;
-					r_state <= s_IDLE;
+					if(i_single_req == 1'b1)
+						r_state <= s_TS;
+					else
+						r_state <= s_IDLE;
 				end
 			s_F:
 				begin
-					r_state <= s_IDLE;
+					if(i_single_req == 1'b1)
+						r_state <= s_F;
+					else
+						r_state <= s_IDLE;
 				end
 				
 		    default :
-				r_state <= s_DEFAULT;
+				begin
+					if(i_single_req == 1'b1)
+						r_state <= s_DEFAULT;
+					else
+						r_state <= s_DEFAULT;// a principio nunca deve cair no estado default
+						//é mantido no mesmo estado para debub
+				end
          
       endcase
     end

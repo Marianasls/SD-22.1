@@ -39,7 +39,7 @@
 
 set_global_assignment -name FAMILY "Cyclone IV E"
 set_global_assignment -name DEVICE EP4CE30F23C7
-set_global_assignment -name TOP_LEVEL_ENTITY fpga_core
+set_global_assignment -name TOP_LEVEL_ENTITY main
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 21.1.0
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "18:57:31  MAY 08, 2022"
 set_global_assignment -name LAST_QUARTUS_VERSION "21.1.0 Lite Edition"
@@ -85,6 +85,9 @@ set_location_assignment PIN_J7 -to debug_state[0]
 set_location_assignment PIN_J6 -to debug_state[1]
 set_location_assignment PIN_K8 -to debug_state[2]
 set_location_assignment PIN_J8 -to debug_state[3]
+set_global_assignment -name SOURCE_FILE db/uart.cmp.rdb
+set_global_assignment -name TIMING_ANALYZER_MULTICORNER_ANALYSIS ON
+set_global_assignment -name SMART_RECOMPILE ON
 set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
 set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
 set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top

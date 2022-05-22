@@ -5,17 +5,19 @@
 
 module main (
   // inputs
-  input        i_Clock,
+  input     i_Clock,
   input  		i_Rx_Serial,
+  input			i_single_req,//para realizar apenas uma requisição, ou seja não voltar ao estado inicial
   inout			dht11,
-  output  		o_Tx_Serial,
+  
+  output  		 o_Tx_Serial,
   output [3:0] debug_state,
-  output			debug_resetSensor,
-  output			debug_uart_signal, //para debug pode ser o rx ou tx conforme for conveniente para os testes
-  output	[7:0]	debug_uart_data,//para debug pode ser o dado recebido ou transimitido conforme for conveniente para os testes
-  output 	   rxBusy, // recebendo dados
-  output 	   txBusy, // transmitindo dados
-  output			rxError
+  output			 debug_resetSensor,
+  output			 debug_uart_signal, //para debug pode ser o rx ou tx conforme for conveniente para os testes
+  output [7:0] debug_uart_data,//para debug pode ser o dado recebido ou transimitido conforme for conveniente para os testes
+  output 	     rxBusy, // recebendo dados
+  output 	   	 txBusy, // transmitindo dados
+  output			 rxError
 );
 
 //parameters
@@ -36,11 +38,6 @@ reg [7:0] d_tx_data;
 assign debug_resetSensor = resetSensor;
 
 assign debug_uart_signal = i_Rx_Serial;
-assign debug_uart_data = d_rx_data;
-
-always @(posedge rxDone) begin
-	d_rx_data <= uartOut;
-end
 
 //assign debug_uart_signal = o_Tx_Serial;
 //assign debug_uart_data = d_tx_data;
@@ -81,14 +78,17 @@ fpga_core controlInst (
   .i_Clock(i_Clock),
   .i_Rx_Data(uartOut),
   .i_Rx_Done(rxDone),
+	.i_Tx_Busy(txBusy),
   .i_Dth_Data(sensorData),
   .i_Dth_Done(sensorDone),
   .i_Dth_Error(sensorError),
   .i_Tx_Done(txDone),
+  .i_single_req(i_single_req),
   .o_Tx_Data(uartIn),
   .o_Tx_Start(txStart),
   .o_Dth_Start(resetSensor),
-  .debug_state(debug_state)
+  .debug_state(debug_state),
+	.debug_rx_Data(debug_uart_data)
 );
 
 
