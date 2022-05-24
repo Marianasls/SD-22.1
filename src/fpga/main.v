@@ -7,7 +7,7 @@ module main (
   // inputs
   input     i_Clock,
   input  		i_Rx_Serial,
-  input			i_single_req,//para realizar apenas uma requisição, ou seja não voltar ao estado inicial
+  //input			i_single_req,//para realizar apenas uma requisição, ou seja não voltar ao estado inicial
   inout			dht11,
   
   output  		 o_Tx_Serial,
@@ -30,7 +30,7 @@ wire rxDone;
 wire txDone;
 wire txStart;
 wire sensorDone, sensorError, resetSensor;
-
+parameter i_single_req = 1;
 //registradores para debug
 reg [7:0] d_rx_data;
 reg [7:0] d_tx_data;

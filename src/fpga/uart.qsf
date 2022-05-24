@@ -60,8 +60,8 @@ set_global_assignment -name POWER_PRESET_COOLING_SOLUTION "23 MM HEAT SINK WITH 
 set_global_assignment -name POWER_BOARD_THERMAL_MODEL "NONE (CONSERVATIVE)"
 set_global_assignment -name EDA_USER_COMPILED_SIMULATION_LIBRARY_DIRECTORY "E:/intelFPGA/21.1" -section_id eda_simulation
 set_location_assignment PIN_T2 -to i_Clock
-set_location_assignment PIN_F14 -to i_Rx_Serial
-set_location_assignment PIN_F13 -to o_Tx_Serial
+set_location_assignment PIN_G13 -to i_Rx_Serial
+set_location_assignment PIN_E13 -to o_Tx_Serial
 set_global_assignment -name VERILOG_FILE main.v
 set_global_assignment -name VERILOG_FILE Uart8Transmitter.v
 set_global_assignment -name VERILOG_FILE Uart8Receiver.v
@@ -70,7 +70,7 @@ set_global_assignment -name VERILOG_FILE fpga_core.v
 set_global_assignment -name VERILOG_FILE BaudRateGenerator.v
 set_global_assignment -name VECTOR_WAVEFORM_FILE Waveform.vwf
 set_global_assignment -name VERILOG_FILE dht11.v
-set_location_assignment PIN_C15 -to dht11
+set_location_assignment PIN_H17 -to dht11
 set_location_assignment PIN_E15 -to debug_uart_signal
 set_location_assignment PIN_F10 -to debug_uart_data[0]
 set_location_assignment PIN_C8 -to debug_uart_data[1]
