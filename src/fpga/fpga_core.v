@@ -88,19 +88,19 @@ module fpga_core (
 
         s_RX_ADDRESS :
           begin
-            r_tx_data     = 0;
-            r_tx_start    = 0;
-            r_dth_start   = 0;
+            r_tx_data    <= 0;
+            r_tx_start   <= 0;
+            r_dth_start  <= 0;
 				
             if (r_Rx_Done == 1'b0 && i_Rx_Done == 1'b1)
               begin
 									r_rx_data <= i_Rx_Data;
                   r_state   <= s_RX_COMMAND;
               end
-			   else
-					r_state   <= s_RX_ADDRESS;
+            else
+              r_state   <= s_RX_ADDRESS;
 
-            r_Rx_Done     = i_Rx_Done;
+            r_Rx_Done     <= i_Rx_Done;
           end // case: s_RX_ADDRESS
 
         s_RX_ADDRESS_E :// endereco invalido, aguarda receber a informacao do comando que deve ser ignorada
@@ -160,11 +160,11 @@ module fpga_core (
               r_dth_start <= 0;
               r_state <= s_TX_COMMAND;
               r_dth_status <= cs_DTH_OKAY;
-              if (r_CR == cr_TEMPERATURE) begin
+              if (r_CR == cr_HUMIDITY) begin
                 r_dth_integral <= i_Dth_Data[7:0];
                 r_dth_decimal <= i_Dth_Data[15:8];
               end
-              else if (r_CR == cr_HUMIDITY) begin
+              else if (r_CR == cs_TEMPERATURE) begin
                 r_dth_integral <= i_Dth_Data[23:16];
                 r_dth_decimal <= i_Dth_Data[31:24];
               end
@@ -205,7 +205,7 @@ module fpga_core (
 						else// assim evita de tx_start volta a 0 antes da uart perceber a mudança
 							r_tx_start	<= 1;
 							
-            if(i_Tx_Done == 1'b1) begin
+            if(r_tx_done == 1'b0 && i_Tx_Done == 1'b1) begin
               r_tx_data <= r_dth_integral;
               r_tx_start <= 1;
               r_state <= s_TX_DECIMAL;
