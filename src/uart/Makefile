@@ -1,12 +1,12 @@
-# Arquivo makefile para criar o programa main, responsável por ativar comunicação uart
+# Arquivo makefile para criar o programa sbc, responsável pelo controle dos sensores
 
 # link do arquivo objeto para criar o executavel 
-main: main.o
-	ld -o main main.o
+sbc: sbc.o
+	ld -o sbc sbc.o
 
 # arquivo assembly para criar arquivo objeto
-main.o: main.s
-	as -g -o main.o main.s
+sbc.o: sbc.s
+	as -g -o sbc.o sbc.s
 
 # remove arquivos objetos
 clean:
